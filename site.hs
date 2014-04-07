@@ -167,8 +167,8 @@ main = hakyll $ do
     route idRoute
     compile $ do
       posts <- recentFirst =<< loadAll "posts/*"
-      let indexCtx = listField "posts" postCtx (return posts) <>
-                     constField "title" "Home"                <>
+      let indexCtx = listField "posts" postCtx (return (take 5 posts)) <>
+                     constField "title" "Home" <>
                      defaultContext
       getResourceBody
         >>= applyAsTemplate indexCtx
