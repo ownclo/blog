@@ -2,9 +2,6 @@
 title: Colophon
 ---
 
-Colophon
-========
-
 This blog is generated with [Hakyll][] and published on Github Pages.  Its
 sources are available on [Github][].
 

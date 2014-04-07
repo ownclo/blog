@@ -2,9 +2,6 @@
 title: Licensing
 ---
 
-Licensing
-=========
-
 Text contents
 -------------
 

@@ -2,9 +2,6 @@
 title: About
 ---
 
-About
-=====
-
 My name is Sebastian Wiesner.  You can find my work on [Github][], read my answers
 on [Stack Overflow][], and follow me on [Twitter][] or [Google Plus][].
 
