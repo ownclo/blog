@@ -1,7 +1,6 @@
-<ul>
-    $for(posts)$
-        <li>
-            <a href="$url$">$title$</a> - $date$
-        </li>
-    $endfor$
-</ul>
+<dl class="dl-horizontal">
+  $for(posts)$
+  <dt>$date$<dt>
+  <dd><a href="$url$">$title$</a></dd>
+  $endfor$
+</dl>
