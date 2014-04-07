@@ -4,6 +4,10 @@ About
 My name is Sebastian Wiesner.  You can find my work on [Github][], read my answers
 on [Stack Overflow][], and follow me on [Twitter][] or [Google Plus][].
 
+<div class="text-center">
+  <img src="/images/profile_small.jpg" class="img-responsive img-thumbnail" alt="My profile picture">
+</div>
+
 I'm a student
 -------------
 
