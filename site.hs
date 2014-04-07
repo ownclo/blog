@@ -77,9 +77,10 @@ tagsCtx = tagsFieldWith getTags renderLink (mconcat.concatLinks) "tags"
     renderLink tag (Just filePath) =
       Just $ H.a ! A.href (toValue $ toUrl filePath) $ toHtml tag
 
-archivePageCtx :: String -> [Item String] -> Context String
-archivePageCtx title posts =
+archivePageCtx :: String -> String -> [Item String] -> Context String
+archivePageCtx title feed posts =
   constField "title" title <>
+  constField "feed" feed <>
   listField "posts" postCtx (return posts) <>
   defaultContext
 
@@ -126,10 +127,12 @@ main = hakyll $ do
     route idRoute
     compile $ do
       posts <- recentFirst =<< loadAll pattern
-      let context = archivePageCtx (printf "Posts tagged “%s”" tag) posts
+      let context = archivePageCtx (printf "Posts tagged “%s”" tag)
+                                   (printf "/tags/%s.atom" tag)
+                                   posts
       makeItem ""
         >>= loadAndApplyTemplate "templates/post-list.html" context
-        >>= loadAndApplyTemplate "templates/page.html" context
+        >>= loadAndApplyTemplate "templates/archive-page.html" context
         >>= loadAndApplyTemplate "templates/default.html" context
         >>= relativizeUrls
 
@@ -177,10 +180,10 @@ main = hakyll $ do
     route idRoute
     compile $ do
       posts <- recentFirst =<< loadAll "posts/*"
-      let context = archivePageCtx "Archives" posts
+      let context = archivePageCtx "Archives" "/feed.atom" posts
       makeItem ""
         >>= loadAndApplyTemplate "templates/post-list.html" context
-        >>= loadAndApplyTemplate "templates/page.html" context
+        >>= loadAndApplyTemplate "templates/archive-page.html" context
         >>= loadAndApplyTemplate "templates/default.html" context
 
   match "index.html" $ do
