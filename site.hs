@@ -32,7 +32,7 @@ import Data.Time.Format (parseTime,formatTime)
 import Hakyll
 import Network.URI (parseAbsoluteURI,URI(URI,uriScheme,uriPath))
 import System.Locale (iso8601DateFormat,defaultTimeLocale)
-import Text.Pandoc
+import Text.Pandoc (Pandoc,Inline(Link))
 import Text.Pandoc.Walk (walkM)
 import Text.Printf (printf)
 import Text.Blaze.Html (toValue,toHtml,(!))
