@@ -10,6 +10,6 @@ Take a look at my [Emacs configuration][] or my [dotfiles][].
 
 [Hakyll]: http://jaspervdj.be/hakyll/
 [bootstrap]: http://getbootstrap.com
-[github]: https://github.com/lunaryorn/lunaryorn.github.io
+[github]: https://github.com/lunaryorn/blog
 [Emacs configuration]: https://github.com/lunaryorn/stante-pede
 [dotfiles]: https://github.com/lunaryorn/dotfiles
