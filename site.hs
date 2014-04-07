@@ -1,10 +1,8 @@
---------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
-import           Data.Monoid (mappend)
-import           Hakyll
 
+import Data.Monoid (mappend)
+import Hakyll
 
---------------------------------------------------------------------------------
 main :: IO ()
 main = hakyll $ do
     match "images/*" $ do
@@ -15,11 +13,12 @@ main = hakyll $ do
         route   idRoute
         compile compressCssCompiler
 
-    match (fromList ["about.rst", "contact.markdown"]) $ do
+    match "pages/*" $ do
         route   $ setExtension "html"
         compile $ pandocCompiler
-            >>= loadAndApplyTemplate "templates/default.html" defaultContext
-            >>= relativizeUrls
+          >>= loadAndApplyTemplate "templates/page.html" defaultContext
+          >>= loadAndApplyTemplate "templates/default.html" defaultContext
+          >>= relativizeUrls
 
     match "posts/*" $ do
         route $ setExtension "html"
@@ -41,7 +40,6 @@ main = hakyll $ do
                 >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
                 >>= loadAndApplyTemplate "templates/default.html" archiveCtx
                 >>= relativizeUrls
-
 
     match "index.html" $ do
         route idRoute
