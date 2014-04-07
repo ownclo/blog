@@ -1,3 +1,7 @@
+---
+title: Colophon
+---
+
 Colophon
 ========
 
