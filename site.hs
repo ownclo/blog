@@ -37,6 +37,15 @@ import Text.Pandoc.Walk (walkM)
 import Text.Printf (printf)
 import Text.Blaze.Html (toValue,toHtml,(!))
 
+feedConfiguration :: FeedConfiguration
+feedConfiguration = FeedConfiguration
+  { feedTitle = "lunarsite"
+  , feedDescription = "Emacs. What else?"
+  , feedAuthorName = "Sebastian Wiesner"
+  , feedAuthorEmail = "lunaryorn@gmail.com"
+  , feedRoot = "http://www.lunaryorn.com"
+  }
+
 addDate :: Metadata -> Routes
 addDate metadata = customRoute addDateToIdentifier
   where
@@ -150,6 +159,7 @@ main = hakyll $ do
   match "posts/*" $ do
     route postRoute
     compile $ transformingPandocCompiler
+      >>= saveSnapshot "postContent"
       >>= loadAndApplyTemplate "templates/post.html"    (tagsCtx tags <> postCtx)
       >>= loadAndApplyTemplate "templates/default.html" postCtx
 
@@ -173,5 +183,18 @@ main = hakyll $ do
       getResourceBody
         >>= applyAsTemplate indexCtx
         >>= loadAndApplyTemplate "templates/default.html" indexCtx
+
+  -- For compatibility with the old Tinkerer-based site
+  create ["rss.html"] $ do
+    route idRoute
+    compile $ loadAllSnapshots "posts/*" "postContent"
+        >>= recentFirst
+        >>= renderRss feedConfiguration (defaultContext <> bodyField "description")
+
+  create ["feed.atom"] $ do
+    route idRoute
+    compile $ loadAllSnapshots "posts/*" "postContent"
+        >>= recentFirst
+        >>= renderAtom feedConfiguration (defaultContext <> bodyField "description")
 
   match "templates/*" $ compile templateCompiler
