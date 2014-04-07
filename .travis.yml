@@ -1,0 +1,7 @@
+language: haskell
+ghc: 7.6
+install: cabal install hakyll
+script:
+  - ghc --make --threaded -O2 -Wall -Werror site.hs
+  - ./site build
+  - ./site check
