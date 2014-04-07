@@ -1,14 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import qualified Data.Map as Map
+import qualified Text.Blaze.Html5 as H
+import qualified Text.Blaze.Html5.Attributes as A
 
 import Data.Maybe (fromJust)
-import Data.Monoid ((<>))
+import Data.Monoid ((<>),mconcat)
 import Data.Time.Clock (UTCTime)
 import Data.Time.Format (parseTime,formatTime)
 import Hakyll
 import System.Locale (iso8601DateFormat,defaultTimeLocale)
 import Text.Printf (printf)
+import Text.Blaze.Html (toValue,toHtml,(!))
 
 addDate :: Metadata -> Routes
 addDate metadata = customRoute addDateToIdentifier
@@ -30,7 +33,16 @@ postCtx :: Context String
 postCtx = dateField "date" "%B %e, %Y" <> defaultContext
 
 tagsCtx :: Tags -> Context String
-tagsCtx = tagsField "tags"
+tagsCtx = tagsFieldWith getTags renderLink (mconcat.concatLinks) "tags"
+  where
+    concatLinks [] = []
+    concatLinks (x:xs) = x : concatTail xs
+    concatTail [] = []
+    concatTail (x:[]) = [" and ", x]
+    concatTail (x:xs) = ", " : x : concatTail xs
+    renderLink _   Nothing         = Nothing
+    renderLink tag (Just filePath) =
+      Just $ H.a ! A.href (toValue $ toUrl filePath) $ toHtml tag
 
 tagPageCtx :: String -> [Item String] -> Context String
 tagPageCtx tag posts =
