@@ -10,7 +10,7 @@ on [Stack Overflow][], and follow me on [Twitter][] or [Google Plus][].
 </div>
 
 I'm a student
--------------
+=============
 
 I'm currently doing my Computer Science Master at the
 [Technische Universität München][TUM] (TUM), taking courses in computer
@@ -19,7 +19,7 @@ stuff).  My majors however are programming languages and compiler construction,
 and computer networks and security.
 
 I'm a programmer
-----------------
+================
 
 I came in touch with a lot of different programming languages, from C to Python
 to OCaml and Haskell, and even Isabelle (a theorem proving language).  As an
@@ -30,7 +30,7 @@ also use VisualStudio to write programs on Windows (for work).  Feel free to
 take a look at at my [dotfiles][] on Github.
 
 I like literature and theater
------------------------------
+=============================
 
 I enjoy music and movies, and I like reading political, philosophical and
 historical books, and classic literature.  I *love* going to the theater (the
