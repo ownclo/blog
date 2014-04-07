@@ -1,6 +1,6 @@
 language: haskell
 ghc: 7.6
-install: cabal install hakyll
+install: cabal install --flag '-watchserver -previewserver' hakyll
 script:
   - ghc --make --threaded -O2 -Wall -Werror site.hs
   - ./site build
