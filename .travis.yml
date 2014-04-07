@@ -1,7 +1,8 @@
 language: haskell
 ghc: 7.6
-install: cabal install --flag '-watchserver -previewserver' hakyll
+install:
+  - cabal install --flag '-watchserver -previewserver' hakyll
+  - cabal install --dependencies-only
 script:
-  - ghc --make -threaded -O2 -Wall -Werror site.hs
-  - ./site build
-  - ./site check
+  - cabal exec lunarsite build
+  - cabal exec lunarsite check
