@@ -113,7 +113,7 @@ Get it
 
 As usual, from [MELPA][] or [Marmalade][].  I recommend the former.
 
-[previous post]: posts/syntax-checker-executables-in-flycheck.md
+[previous post]: internal:posts/syntax-checker-executables-in-flycheck.md
 [flycheck]: http://flycheck.github.io
 [Source Code Pro]: https://github.com/adobe/source-code-pro
 [Solarized Light]: https://github.com/bbatsov/solarized-emacs
