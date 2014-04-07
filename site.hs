@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wall #-}
 
 import qualified Data.Map as Map
 import qualified Text.Blaze.Html5 as H
