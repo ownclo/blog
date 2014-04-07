@@ -39,7 +39,7 @@ import Text.Blaze.Html (toValue,toHtml,(!))
 
 feedConfiguration :: FeedConfiguration
 feedConfiguration = FeedConfiguration
-  { feedTitle = "lunarsite"
+  { feedTitle = "lunarsite — All posts"
   , feedDescription = "Emacs. What else?"
   , feedAuthorName = "Sebastian Wiesner"
   , feedAuthorEmail = "lunaryorn@gmail.com"
@@ -120,6 +120,7 @@ transformingPandocCompiler =
 main :: IO ()
 main = hakyll $ do
   tags <- buildTags "posts/*" (fromCapture "tags/*.html")
+  tagFeeds <- buildTags "posts/*" (fromCapture "tags/*.atom")
 
   tagsRules tags $ \tag pattern -> do
     route idRoute
@@ -131,6 +132,15 @@ main = hakyll $ do
         >>= loadAndApplyTemplate "templates/page.html" context
         >>= loadAndApplyTemplate "templates/default.html" context
         >>= relativizeUrls
+
+  tagsRules tagFeeds $ \tag pattern -> do
+    route idRoute
+    compile $ do
+      let title = printf "lunarsite – Posts tagged %s" tag
+      let config = feedConfiguration{feedTitle = title}
+      loadAllSnapshots pattern "postContent"
+        >>= recentFirst
+        >>= renderAtom config (defaultContext <> bodyField "description")
 
   create ["tags/index.html"] $ do
     route idRoute
