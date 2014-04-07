@@ -4,5 +4,5 @@ install:
   - cabal install --flag '-watchserver -previewserver' hakyll
   - cabal install --dependencies-only
 script:
-  - cabal exec lunarsite build
-  - cabal exec lunarsite check
+  - cabal run lunarsite build
+  - cabal run lunarsite check
