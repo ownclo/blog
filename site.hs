@@ -164,15 +164,14 @@ main = hakyll $ do
         >>= loadAndApplyTemplate "templates/default.html" context
 
   match "index.html" $ do
-      route idRoute
-      compile $ do
-          posts <- recentFirst =<< loadAll "posts/*"
-          let indexCtx =
-                  listField "posts" postCtx (return posts) <>
-                  constField "title" "Home"                <>
-                  defaultContext
-          getResourceBody
-              >>= applyAsTemplate indexCtx
-              >>= loadAndApplyTemplate "templates/default.html" indexCtx
+    route idRoute
+    compile $ do
+      posts <- recentFirst =<< loadAll "posts/*"
+      let indexCtx = listField "posts" postCtx (return posts) <>
+                     constField "title" "Home"                <>
+                     defaultContext
+      getResourceBody
+        >>= applyAsTemplate indexCtx
+        >>= loadAndApplyTemplate "templates/default.html" indexCtx
 
   match "templates/*" $ compile templateCompiler
