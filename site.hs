@@ -9,6 +9,7 @@ import Data.Monoid ((<>),mconcat)
 import Data.Time.Clock (UTCTime)
 import Data.Time.Format (parseTime,formatTime)
 import Hakyll
+import Network.URI (parseAbsoluteURI,URI(URI,uriScheme,uriPath))
 import System.Locale (iso8601DateFormat,defaultTimeLocale)
 import Text.Printf (printf)
 import Text.Blaze.Html (toValue,toHtml,(!))
@@ -50,6 +51,24 @@ archivePageCtx title posts =
   listField "posts" postCtx (return posts) <>
   defaultContext
 
+referenceEmacsLispSymbol :: String -> String -> String
+referenceEmacsLispSymbol =
+  printf "http://bruce-connor.github.io/emacs-online-documentation/%s%%2F%s"
+
+convertOurSchemes :: String -> String
+convertOurSchemes url = maybe url convertSchemes (parseAbsoluteURI url)
+  where
+    convertSchemes URI{uriScheme="el-variable:", uriPath=symbol} =
+      referenceEmacsLispSymbol "Var" symbol
+    convertSchemes URI{uriScheme="el-function:", uriPath=symbol} =
+      referenceEmacsLispSymbol "Fun" symbol
+    convertSchemes URI{uriScheme="el-face:", uriPath=symbol} =
+      referenceEmacsLispSymbol "Face" symbol
+    convertSchemes _ = url
+
+resolveSpecialSchemes :: Item String -> Compiler (Item String)
+resolveSpecialSchemes item = return (fmap (withUrls convertOurSchemes) item)
+
 main :: IO ()
 main = hakyll $ do
   tags <- buildTags "posts/*" (fromCapture "tags/*.html")
@@ -63,6 +82,7 @@ main = hakyll $ do
         >>= loadAndApplyTemplate "templates/post-list.html" context
         >>= loadAndApplyTemplate "templates/page.html" context
         >>= loadAndApplyTemplate "templates/default.html" context
+        >>= resolveSpecialSchemes
         >>= relativizeUrls
 
   create ["tags/index.html"] $ do
@@ -73,6 +93,7 @@ main = hakyll $ do
       makeItem cloud
         >>= loadAndApplyTemplate "templates/page.html" context
         >>= loadAndApplyTemplate "templates/default.html" context
+        >>= resolveSpecialSchemes
         >>= relativizeUrls
 
   match "images/*" $ do
@@ -88,14 +109,14 @@ main = hakyll $ do
     compile $ pandocCompiler
       >>= loadAndApplyTemplate "templates/page.html" defaultContext
       >>= loadAndApplyTemplate "templates/default.html" defaultContext
-      >>= relativizeUrls
+      >>= resolveSpecialSchemes
 
   match "posts/*" $ do
     route postRoute
     compile $ pandocCompiler
       >>= loadAndApplyTemplate "templates/post.html"    (tagsCtx tags <> postCtx)
       >>= loadAndApplyTemplate "templates/default.html" postCtx
-      >>= relativizeUrls
+      >>= resolveSpecialSchemes
 
   create ["archive.html"] $ do
     route idRoute
@@ -118,6 +139,6 @@ main = hakyll $ do
           getResourceBody
               >>= applyAsTemplate indexCtx
               >>= loadAndApplyTemplate "templates/default.html" indexCtx
-              >>= relativizeUrls
+              >>= resolveSpecialSchemes
 
   match "templates/*" $ compile templateCompiler
