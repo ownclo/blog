@@ -208,3 +208,17 @@ main = hakyll $ do
         >>= renderAtom feedConfiguration (defaultContext <> bodyField "description")
 
   match "templates/*" $ compile templateCompiler
+
+  -- Github pages stuff
+  create [".nojekyll"] $ do
+    route idRoute
+    compile empty
+
+  create ["CNAME"] $ do
+    route idRoute
+    compile domain
+
+  where domain :: Compiler (Item String)
+        domain = makeItem "www.lunaryorn.com\n"
+        empty :: Compiler (Item String)
+        empty = makeItem ""
