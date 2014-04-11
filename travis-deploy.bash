@@ -20,7 +20,7 @@ check_environment "$TRAVIS_SECURE_ENV_VARS" "true" "secure variables missing"
 echo "Publishing blog... \n"
 
 # Git setup
-export GIT_COMMITTER_MAIL='lunaryorn@gmail.com'
+export GIT_COMMITTER_EMAIL='lunaryorn@gmail.com'
 export GIT_COMMITTER_NAME='Sebastian Wiesner'
 export GIT_AUTHOR_EMAIL='travis@travis-ci.org'
 export GIT_AUTHOR_NAME='Travis CI'
