@@ -26,3 +26,4 @@ executable lunarsite
                        pandoc >=1.12 && <1.13,
                        hakyll >=4 && <5
   default-language:    Haskell2010
+  ghc-options:         -Wall
