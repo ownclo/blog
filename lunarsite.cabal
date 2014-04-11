@@ -3,12 +3,18 @@ version:             0.1.0.0
 synopsis:            Personal website
 homepage:            http://www.lunaryorn.com
 license:             MIT
-license-file:        LICENSE
 author:              Sebastian Wiesner
 maintainer:          lunaryorn@gmail.com
 category:            Web
 build-type:          Simple
 cabal-version:       >=1.10
+extra-source-files:  css/*.css
+                     images/*.png
+                     images/*.jpg
+                     pages/*.md
+                     posts/*.md
+                     templates/*.html
+                     index.html
 
 executable lunarsite
   main-is:             main.hs
