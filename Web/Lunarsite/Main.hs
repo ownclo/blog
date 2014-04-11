@@ -42,6 +42,7 @@ feedConfiguration = FeedConfiguration
 hakyllConfiguration :: Configuration
 hakyllConfiguration = defaultConfiguration {
     ignoreFile = includeDot (ignoreFile defaultConfiguration)
+  , deployCommand = "git push"  -- Travis CI will do the rest
   , inMemoryCache = True }
   where includeDot _ ('.':_) = False
         includeDot ignore fn = ignore fn
