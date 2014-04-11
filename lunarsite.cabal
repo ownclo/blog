@@ -20,8 +20,10 @@ extra-source-files:  css/*.css
 
 executable lunarsite
   main-is:             main.hs
-  other-modules:       Web.Lunarsite.Main
+  other-modules:       Web.Lunarsite.Info
+                       Web.Lunarsite.Main
                        Web.Lunarsite.Pandoc
+                       Web.Lunarsite.Pygments
                        Web.Lunarsite.Routes
                        Web.Lunarsite.Template.Context
   build-depends:       base >=4.6 && <4.7,
