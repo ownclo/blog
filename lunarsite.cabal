@@ -14,6 +14,8 @@ extra-source-files:  css/*.css
                      pages/*.md
                      posts/*.md
                      templates/*.html
+                     .nojekyll
+                     CNAME
                      index.html
 
 executable lunarsite

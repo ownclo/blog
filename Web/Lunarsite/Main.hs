@@ -39,8 +39,15 @@ feedConfiguration = FeedConfiguration
   , feedRoot = "http://www.lunaryorn.com"
   }
 
+hakyllConfiguration :: Configuration
+hakyllConfiguration = defaultConfiguration {
+  ignoreFile = includeDot (ignoreFile defaultConfiguration)
+  }
+  where includeDot _ ('.':_) = False
+        includeDot ignore fn = ignore fn
+
 main :: IO ()
-main = hakyll $ do
+main = hakyllWith hakyllConfiguration $ do
   tags <- buildTags "posts/*" (fromCapture "tags/*.html")
   tagFeeds <- buildTags "posts/*" (fromCapture "tags/*.atom")
 
@@ -134,15 +141,6 @@ main = hakyll $ do
   match "templates/*" $ compile templateCompiler
 
   -- Github pages stuff
-  create [".nojekyll"] $ do
+  match (fromList [".nojekyll", "CNAME"]) $ do
     route idRoute
-    compile empty
-
-  create ["CNAME"] $ do
-    route idRoute
-    compile domain
-
-  where domain :: Compiler (Item String)
-        domain = makeItem "www.lunaryorn.com\n"
-        empty :: Compiler (Item String)
-        empty = makeItem ""
+    compile copyFileCompiler
