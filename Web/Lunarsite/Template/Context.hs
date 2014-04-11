@@ -42,7 +42,8 @@ infoContext :: Context String
 infoContext = C.constField "siteCopyright" I.siteCopyright <>
               C.constField "siteAuthor" I.siteAuthor <>
               C.constField "siteAuthorEmail" I.siteAuthorEmail <>
-              C.constField "siteCopyright" I.siteCopyright
+              C.constField "siteCopyright" I.siteCopyright <>
+              C.constField "siteRepository" I.siteRepository
 
 defaultContext :: Context String
 defaultContext = infoContext <> C.defaultContext
