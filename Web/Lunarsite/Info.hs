@@ -24,7 +24,9 @@ module Web.Lunarsite.Info
        ,siteAuthor
        ,siteAuthorEmail
        ,siteDescription
-       ,siteRoot)
+       ,siteRoot
+       ,siteRepository
+       ,itemSource)
        where
 
 siteDescription :: String
@@ -44,3 +46,6 @@ siteRoot = "http://www.lunaryorn.com"
 
 siteRepository :: String
 siteRepository = "https://github.com/lunaryorn/blog"
+
+itemSource :: FilePath -> String
+itemSource path = siteRepository ++ "/blob/master/" ++ path

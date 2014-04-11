@@ -31,7 +31,8 @@ import qualified Text.Blaze.Html5.Attributes as A
 import qualified Hakyll.Web.Template.Context as C
 
 import Data.Monoid ((<>),mconcat)
-import Hakyll.Core.Item (Item)
+import Hakyll.Core.Identifier (toFilePath)
+import Hakyll.Core.Item (Item(itemIdentifier))
 import Hakyll.Web.Html (toUrl)
 import Hakyll.Web.Tags (Tags,tagsFieldWith,getTags)
 import Hakyll.Web.Template.Context (Context)
@@ -46,8 +47,13 @@ infoContext = C.constField "siteCopyright" I.siteCopyright <>
 defaultContext :: Context String
 defaultContext = infoContext <> C.defaultContext
 
+sourceField :: String -> Context a
+sourceField key = C.field key (return.I.itemSource.toFilePath.itemIdentifier)
+
 postContext :: Context String
-postContext = C.dateField "date" "%B %e, %Y" <> defaultContext
+postContext = sourceField "source" <>
+              C.dateField "date" "%B %e, %Y" <>
+              defaultContext
 
 tagsContext :: Tags -> Context String
 tagsContext = tagsFieldWith getTags renderLink (mconcat.concatLinks) "tags"
