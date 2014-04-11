@@ -30,7 +30,7 @@ rsync -a --delete --exclude /.git/ _site/ deploy
 
 cd deploy
 git add --force --all .
-git commit -m "Update from ${TRAVIS_COMMIT}"
+git commit -m "Update from lunaryorn/blog@${TRAVIS_COMMIT}"
 git push --force --quiet origin master
 
 echo "Published blog!"
