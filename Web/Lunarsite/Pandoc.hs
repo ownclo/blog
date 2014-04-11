@@ -18,18 +18,28 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 
+{-# LANGUAGE OverloadedStrings #-}
+
 module Web.Lunarsite.Pandoc
        (transformingPandocCompiler)
        where
 
+import qualified Web.Lunarsite.Pygments as P
+
+import qualified Text.Blaze.Html5 as H
+import qualified Text.Blaze.Html5.Attributes as A
+import Control.Monad (liftM)
 import Network.URI (parseAbsoluteURI,URI(URI,uriScheme,uriPath))
-import Hakyll.Core.Compiler (Compiler,getRoute)
+import Hakyll.Core.Compiler (Compiler,getRoute,unsafeCompiler)
 import Hakyll.Core.Identifier (fromFilePath)
 import Hakyll.Core.Item (Item)
 import Hakyll.Web.Pandoc (pandocCompilerWithTransformM
                          ,defaultHakyllReaderOptions
                          ,defaultHakyllWriterOptions)
-import Text.Pandoc (Pandoc,Inline(Link))
+import Text.Blaze.Html (preEscapedToHtml)
+import Text.Blaze.Html.Renderer.String (renderHtml)
+import Text.Blaze.Html5 ((!))
+import Text.Pandoc (Pandoc,Inline(Link),Block(CodeBlock,RawBlock),nullAttr)
 import Text.Pandoc.Walk (walkM)
 import Text.Printf (printf)
 
@@ -60,8 +70,17 @@ transformLinks link@(Link ref (url,title)) =
         Just newUrl -> return (Link ref (newUrl,title))
 transformLinks x = return x
 
+pygmentizeCodeBlocks :: Block -> Compiler Block
+pygmentizeCodeBlocks x@(CodeBlock attr _) | attr == nullAttr = return x
+pygmentizeCodeBlocks x@(CodeBlock (_,[],_) _) = return x
+pygmentizeCodeBlocks (CodeBlock (_,language:_,_) text) = do
+  code <- liftM preEscapedToHtml (unsafeCompiler (P.toHtml language text))
+  let colored = renderHtml (H.pre code ! A.class_ "highlight")
+  return (RawBlock "html" colored)
+pygmentizeCodeBlocks x = return x
+
 transformDocument :: Pandoc -> Compiler Pandoc
-transformDocument = walkM transformLinks
+transformDocument doc = walkM transformLinks doc >>= walkM pygmentizeCodeBlocks
 
 transformingPandocCompiler :: Compiler (Item String)
 transformingPandocCompiler =

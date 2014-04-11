@@ -6,6 +6,8 @@ env:
 install:
   - cabal install --flag '-watchserver -previewserver' hakyll
   - cabal install --dependencies-only
+  # Required for syntax highlighting
+  - pip install pygments
 script:
   - cabal run lunarsite build
   - cabal run lunarsite check

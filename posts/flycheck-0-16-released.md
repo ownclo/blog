@@ -80,7 +80,7 @@ disable syntax checkers.
 Previously, you needed to remove syntax checkers from `flycheck-checkers` to
 disable them, either via the Customization interface, or by custom Emacs Lisp:
 
-```commonlisp
+```common-lisp
 (setq flycheck-checkers (delq 'emacs-lisp-checkdoc flycheck-checkers))
 ```
 

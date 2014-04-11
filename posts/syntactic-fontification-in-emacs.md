@@ -54,7 +54,7 @@ Strings
 Puppet has two types of strings enclosed in single and double quotes
 respectively.  Let's define a syntax table that understands these strings:
 
-```commonlisp
+```common-lisp
 (defvar puppet-mode-syntax-table
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?\' "\"'"  table)
@@ -100,7 +100,7 @@ string.  This is easily fixed, however.  Just like any other language, Puppet
 uses the backslash to escape string delimiters, we just need to tell Emacs about
 this with one extra entry in our syntax table:
 
-```commonlisp
+```common-lisp
 (modify-syntax-entry ?\\ "\\" table)
 ```
 
@@ -119,7 +119,7 @@ comments:
 
 The first kind is easy:
 
-```commonlisp
+```common-lisp
 (modify-syntax-entry ?# "<" table)
 (modify-syntax-entry ?\n ">" table)
 ```
@@ -148,7 +148,7 @@ flags are concerned with two-character syntax.  From [Syntax Flags][]:
 With these flags, we can now tune the descriptors of the `/` and `*`
 characters to reflect their comment syntax, as well as their operator meaning::
 
-```commonlisp
+```common-lisp
 (modify-syntax-entry ?/ ". 14" table)
 (modify-syntax-entry ?* ". 23" table)
 ```
@@ -182,7 +182,7 @@ Flags][]:
 By adding this flag, we tell Emacs to consider both comment styles
 independently, so we replace our first attempt with the following lines:
 
-```commonlisp
+```common-lisp
 (modify-syntax-entry ?/ ". 14b" table)
 (modify-syntax-entry ?* ". 23b" table)
 ```

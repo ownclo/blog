@@ -133,7 +133,7 @@ The new `info` level is backed by a generic mechanism to define new error
 levels, using the new function `flycheck-define-error-level`.  For instance, the
 `warning` level is now defined as follows:
 
-```commonlisp
+```common-lisp
 (flycheck-define-error-level 'warning
   :overlay-category 'flycheck-warning-overlay
   :fringe-bitmap 'question-mark

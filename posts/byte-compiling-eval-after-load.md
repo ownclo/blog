@@ -25,7 +25,7 @@ Introducing eval-after-load
 The GNU Emacs function `eval-after-load` schedules a form for evaluation after a
 named feature or a file:
 
-```commonlisp
+```common-lisp
 (eval-after-load 'ido
   '(setq ido-enable-flex-matching t      ; Match characters if string doesn't
                                          ; match
@@ -46,7 +46,7 @@ warnings about assignment to free variables for your `setq` forms.
 Many users do not use `eval-after-load` directly, but write a helper macro
 instead to allow for multiple body forms and get rid of the quoting:
 
-```commonlisp
+```common-lisp
 (defmacro stante-after (feature &rest forms)
   "After FEATURE is loaded, evaluate FORMS.
 
@@ -82,7 +82,7 @@ This issue is reported as [bug #13021][].  While the actual discussion of this
 feature has apparently dropped off, the bug report includes an implementation of
 a byte-compiling `eval-after-load`:
 
-```commonlisp
+```common-lisp
 (defmacro stante-after (feature &rest forms)
   "After FEATURE is loaded, evaluate FORMS.
 
@@ -138,7 +138,7 @@ executable code, by quoting the forms with a [“function” quote][]:
 As `function` wants a function object, we wrap our forms into a `lambda` instead
 of a `progn`:
 
-```commonlisp
+```common-lisp
 (defmacro stante-after (feature &rest forms)
   `(eval-after-load ',feature
      `(funcall (function ,(lambda () ,@forms)))))
@@ -164,7 +164,7 @@ because the `feature` is never actually loaded during byte compilation.  To
 avoid these warnings, we consequently need to load the feature during byte
 compilation:
 
-```commonlisp
+```common-lisp
 (defmacro stante-after (feature &rest forms)
   (when (and (boundp 'byte-compile-current-file) byte-compile-current-file)
     (if (symbolp feature) (require feature) (load feature)))
@@ -193,7 +193,7 @@ If all features are available during byte compilation, we are done now. However,
 if some of the features in your `init.el` are not available during compilation,
 it got much worse now:
 
-```commonlisp
+```common-lisp
 (stante-after tex
   (setq TeX-parse-self t                ; Parse documents to provide completion
                                         ; for packages, etc.
@@ -209,7 +209,7 @@ compilation brutally fails now:
 
 We obviously need to handle the missing features more gracefully:
 
-```commonlisp
+```common-lisp
 (defmacro stante-after (feature &rest forms)
   (when (and (boundp 'byte-compile-current-file) byte-compile-current-file)
     (if (symbolp feature)
@@ -238,7 +238,7 @@ We can fix this problem by wrapping the `eval-after-load` form with
 suppresses all byte compiler warnings in the contained block.  Both `load` and
 `require` will return `nil` if the feature or file is not available:
 
-```commonlisp
+```common-lisp
 (defmacro stante-after (feature &rest forms)
   `(,(if (or (not (boundp 'byte-compile-current-file))
              (not byte-compile-current-file)
