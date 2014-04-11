@@ -16,5 +16,6 @@ script:
 after_success:
 - bash travis-deploy.bash
 cache:
-  - cabal.sandbox.config
-  - .cabal-sandbox
+  directories:
+    - cabal.sandbox.config
+    - .cabal-sandbox
