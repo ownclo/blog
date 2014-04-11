@@ -41,8 +41,8 @@ feedConfiguration = FeedConfiguration
 
 hakyllConfiguration :: Configuration
 hakyllConfiguration = defaultConfiguration {
-  ignoreFile = includeDot (ignoreFile defaultConfiguration)
-  }
+    ignoreFile = includeDot (ignoreFile defaultConfiguration)
+  , inMemoryCache = True }
   where includeDot _ ('.':_) = False
         includeDot ignore fn = ignore fn
 
