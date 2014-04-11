@@ -21,23 +21,33 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Web.Lunarsite.Template.Context
-       (postContext,tagsContext,archivePageContext)
+       (defaultContext,postContext,tagsContext,archivePageContext)
        where
+
+import qualified Web.Lunarsite.Info as I
 
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
+import qualified Hakyll.Web.Template.Context as C
 
 import Data.Monoid ((<>),mconcat)
 import Hakyll.Core.Item (Item)
 import Hakyll.Web.Html (toUrl)
 import Hakyll.Web.Tags (Tags,tagsFieldWith,getTags)
-import Hakyll.Web.Template.Context (Context
-                                   ,defaultContext
-                                   ,dateField,constField,listField)
+import Hakyll.Web.Template.Context (Context)
 import Text.Blaze.Html (toValue,toHtml,(!))
 
+infoContext :: Context String
+infoContext = C.constField "siteCopyright" I.siteCopyright <>
+              C.constField "siteAuthor" I.siteAuthor <>
+              C.constField "siteAuthorEmail" I.siteAuthorEmail <>
+              C.constField "siteCopyright" I.siteCopyright
+
+defaultContext :: Context String
+defaultContext = infoContext <> C.defaultContext
+
 postContext :: Context String
-postContext = dateField "date" "%B %e, %Y" <> defaultContext
+postContext = C.dateField "date" "%B %e, %Y" <> defaultContext
 
 tagsContext :: Tags -> Context String
 tagsContext = tagsFieldWith getTags renderLink (mconcat.concatLinks) "tags"
@@ -53,7 +63,7 @@ tagsContext = tagsFieldWith getTags renderLink (mconcat.concatLinks) "tags"
 
 archivePageContext :: String -> String -> [Item String] -> Context String
 archivePageContext title feed posts =
-  constField "title" title <>
-  constField "feed" feed <>
-  listField "posts" postContext (return posts) <>
+  C.constField "title" title <>
+  C.constField "feed" feed <>
+  C.listField "posts" postContext (return posts) <>
   defaultContext

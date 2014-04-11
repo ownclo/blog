@@ -22,21 +22,22 @@
 
 module Web.Lunarsite.Main (main) where
 
+import qualified Web.Lunarsite.Info as I
 import Web.Lunarsite.Pandoc
 import Web.Lunarsite.Routes
 import Web.Lunarsite.Template.Context
 
 import Data.Monoid ((<>))
-import Hakyll
+import Hakyll hiding (defaultContext)
 import Text.Printf (printf)
 
 feedConfiguration :: FeedConfiguration
 feedConfiguration = FeedConfiguration
   { feedTitle = "lunarsite — All posts"
-  , feedDescription = "Emacs. What else?"
-  , feedAuthorName = "Sebastian Wiesner"
-  , feedAuthorEmail = "lunaryorn@gmail.com"
-  , feedRoot = "http://www.lunaryorn.com"
+  , feedDescription = I.siteDescription
+  , feedAuthorName = I.siteAuthor
+  , feedAuthorEmail = I.siteAuthorEmail
+  , feedRoot = I.siteRoot
   }
 
 hakyllConfiguration :: Configuration
