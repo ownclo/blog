@@ -29,6 +29,7 @@ import Web.Lunarsite.Template.Context
 
 import Data.Monoid ((<>))
 import Hakyll hiding (defaultContext)
+import System.FilePath (takeFileName)
 import Text.Printf (printf)
 
 feedConfiguration :: FeedConfiguration
@@ -42,11 +43,11 @@ feedConfiguration = FeedConfiguration
 
 hakyllConfiguration :: Configuration
 hakyllConfiguration = defaultConfiguration {
-    ignoreFile = includeDot (ignoreFile defaultConfiguration)
+    ignoreFile = includeSomeHiddenFiles (ignoreFile defaultConfiguration)
   , deployCommand = "git push"  -- Travis CI will do the rest
   , inMemoryCache = True }
-  where includeDot _ ('.':_) = False
-        includeDot ignore fn = ignore fn
+  where includeSomeHiddenFiles _ fn | takeFileName fn ==  ".nojekyll" = False
+        includeSomeHiddenFiles ignore fn = ignore fn
 
 main :: IO ()
 main = hakyllWith hakyllConfiguration $ do
