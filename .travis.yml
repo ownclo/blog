@@ -3,8 +3,6 @@ ghc: 7.6
 env:
   global:
     - secure: "HlDP2le4lW8BDsVNt4M+PZ54kJrdI1KLrjk2qW2dtAoq0U3vo+iiR4K8W0c/xxqYhTlSCUc8CbkfGgsoEBRuHqBMgEGdUxsEvDiFHoCHPqe8qgC7sW6cNzVCjRvjo4e/MLRsIIppuUWjrz5wyCVOHCh4hgg8Jw3/Ba3Wutwb/9s="
-before_install:
-  - cabal sandbox init
 install:
   - cabal install --flag '-watchserver -previewserver' hakyll
   - cabal install --dependencies-only
@@ -17,5 +15,5 @@ after_success:
 - bash travis-deploy.bash
 cache:
   directories:
-    - cabal.sandbox.config
-    - .cabal-sandbox
+    - $HOME/.ghc
+    - $HOME/.cabal
