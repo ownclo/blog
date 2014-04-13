@@ -19,9 +19,8 @@
 -- THE SOFTWARE.
 
 {-# LANGUAGE ForeignFunctionInterface #-}
-{-# LANGUAGE ForeignFunctionInterface #-}
 
-module Web.Lunarsite.Python.Native where
+module Foreign.Python.Native where
 
 #include <Python.h>
 

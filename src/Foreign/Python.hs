@@ -21,7 +21,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Web.Lunarsite.Python
+module Foreign.Python
        (
          -- * Initialization
          initialize
@@ -37,7 +37,7 @@ module Web.Lunarsite.Python
        )
        where
 
-import Web.Lunarsite.Python.Native
+import Foreign.Python.Native
 
 import qualified Data.ByteString.UTF8 as UTF8
 import Control.Exception (Exception,throwIO)

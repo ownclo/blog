@@ -18,11 +18,11 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 
-module Web.Lunarsite.Pygments
+module Text.Highlighting.Pygments
        (toHtml)
        where
 
-import qualified Web.Lunarsite.Python as Python
+import qualified Foreign.Python as Python
 
 toHtml :: String -> String -> IO String
 toHtml code language = do

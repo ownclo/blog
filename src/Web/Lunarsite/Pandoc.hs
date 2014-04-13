@@ -24,7 +24,7 @@ module Web.Lunarsite.Pandoc
        (transformingPandocCompiler)
        where
 
-import qualified Web.Lunarsite.Pygments as P
+import qualified Text.Highlighting.Pygments as P
 
 import Network.URI (parseAbsoluteURI,URI(URI,uriScheme,uriPath))
 import Hakyll.Core.Compiler (Compiler,getRoute,unsafeCompiler)
