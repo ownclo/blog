@@ -26,9 +26,6 @@ module Web.Lunarsite.Pandoc
 
 import qualified Web.Lunarsite.Pygments as P
 
-import qualified Text.Blaze.Html5 as H
-import qualified Text.Blaze.Html5.Attributes as A
-import Control.Monad (liftM)
 import Network.URI (parseAbsoluteURI,URI(URI,uriScheme,uriPath))
 import Hakyll.Core.Compiler (Compiler,getRoute,unsafeCompiler)
 import Hakyll.Core.Identifier (fromFilePath)
@@ -36,9 +33,6 @@ import Hakyll.Core.Item (Item)
 import Hakyll.Web.Pandoc (pandocCompilerWithTransformM
                          ,defaultHakyllReaderOptions
                          ,defaultHakyllWriterOptions)
-import Text.Blaze.Html (preEscapedToHtml)
-import Text.Blaze.Html.Renderer.String (renderHtml)
-import Text.Blaze.Html5 ((!))
 import Text.Pandoc (Pandoc,Inline(Link),Block(CodeBlock,RawBlock),nullAttr)
 import Text.Pandoc.Walk (walkM)
 import Text.Printf (printf)
@@ -74,8 +68,7 @@ pygmentizeCodeBlocks :: Block -> Compiler Block
 pygmentizeCodeBlocks x@(CodeBlock attr _) | attr == nullAttr = return x
 pygmentizeCodeBlocks x@(CodeBlock (_,[],_) _) = return x
 pygmentizeCodeBlocks (CodeBlock (_,language:_,_) text) = do
-  code <- liftM preEscapedToHtml (unsafeCompiler (P.toHtml language text))
-  let colored = renderHtml (H.pre code ! A.class_ "highlight")
+  colored <- unsafeCompiler (P.toHtml text language)
   return (RawBlock "html" colored)
 pygmentizeCodeBlocks x = return x
 
