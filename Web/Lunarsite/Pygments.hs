@@ -18,31 +18,26 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 
-{-# LANGUAGE DeriveDataTypeable #-}
-
 module Web.Lunarsite.Pygments
        (toHtml)
        where
 
-import Control.Exception (throwIO,Exception)
-import Data.Typeable (Typeable)
-import System.Exit (ExitCode(..))
-import System.Process (readProcessWithExitCode)
-import Text.Printf (printf)
-
-data PygmentsError = PygmentsError Int String
-                   deriving Typeable
-
-instance Show PygmentsError where
-  show (PygmentsError code stderr) =
-    printf "Pygmentize failed with code %d: %s" code stderr
-
-instance Exception PygmentsError
+import qualified Web.Lunarsite.Python as Python
 
 toHtml :: String -> String -> IO String
-toHtml language code = do
-  (exitStatus, stdout, stderr) <- readProcessWithExitCode "pygmentize" args code
-  case exitStatus of
-    ExitFailure exitCode -> throwIO (PygmentsError exitCode stderr)
-    ExitSuccess -> return stdout
-  where args = ["-f", "html", "-Oencoding=utf-8", "-P", "nowrap", "-l", language]
+toHtml code language = do
+  Python.initialize False
+  pygments <- Python.importModule "pygments"
+  formatters <- Python.importModule "pygments.formatters"
+  lexers <- Python.importModule "pygments.lexers"
+  html_formatter <- Python.getAttr formatters "HtmlFormatter"
+  cssclass_key <- Python.toPy "cssclass"
+  cssclass <- Python.toPy "highlight"
+  formatter <- Python.callObject html_formatter [] [(cssclass_key, cssclass)]
+  get_lexer_by_name <- Python.getAttr lexers "get_lexer_by_name"
+  languageObj <- Python.toPy language
+  lexer <- Python.callObject get_lexer_by_name [languageObj] []
+  highlight <- Python.getAttr pygments "highlight"
+  codeObj <- Python.toPy code
+  highlighted_code <- Python.callObject highlight [codeObj, lexer, formatter] []
+  Python.fromPy highlighted_code
