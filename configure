@@ -1,0 +1,13 @@
+#!/bin/sh
+
+maxunicode="$(python2.7 -c 'import sys; print sys.maxunicode')"
+if [ "${maxunicode}" -eq 65535 ]; then
+  cpp_options='-DPYTHON_UCS2'
+else
+  cpp_options='-DPYTHON_UCS4'
+fi
+
+cat > lunarsite.buildinfo <<EOF
+executable: lunarsite
+cpp-options: ${cpp_options}
+EOF

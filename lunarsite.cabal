@@ -6,7 +6,7 @@ license:             MIT
 author:              Sebastian Wiesner
 maintainer:          lunaryorn@gmail.com
 category:            Web
-build-type:          Simple
+build-type:          Configure
 cabal-version:       >=1.10
 extra-source-files:  css/*.css
                      images/*.png
@@ -47,6 +47,5 @@ executable lunarsite
   if os(darwin)
      extra-libraries:   python2.7
      include-dirs:      /usr/include/python2.7
-     cpp-options:       -DPYTHON_UCS2
   else
      pkgconfig-depends: python ==2.7
