@@ -6,7 +6,7 @@ license:             MIT
 author:              Sebastian Wiesner
 maintainer:          lunaryorn@gmail.com
 category:            Web
-build-type:          Configure
+build-type:          Simple
 cabal-version:       >=1.10
 extra-source-files:  css/*.css
                      images/*.png
@@ -17,6 +17,11 @@ extra-source-files:  css/*.css
                      .nojekyll
                      CNAME
                      index.html
+
+flag UCS2
+  description:        Whether Python is build with UCS2
+  default:            True
+
 
 executable lunarsite
   hs-source-dirs:      src/
@@ -48,5 +53,11 @@ executable lunarsite
   if os(darwin)
      extra-libraries:   python2.7
      include-dirs:      /usr/include/python2.7
+     -- OS X is always UCS 2
+     cpp-options:       -DPYTHON_UCS2
   else
      pkgconfig-depends: python ==2.7
+     if flag(ucs2)
+       cpp-options:     -DPYTHON_UCS2
+     else
+       cpp-options:     -DPYTHON_UCS4
