@@ -54,32 +54,52 @@ data PythonException = PythonException deriving (Typeable,Show)
 
 instance Exception PythonException
 
+-- |@'toPyObject' object@ converts the raw @object@ into a managed pointer.
+--
+-- A managed point will automatically de-reference the object pointed to when it
+-- goes out of scope.
 toPyObject :: RawPyObject -> IO PyObject
 toPyObject = newForeignPtr pyDecRef
 
+-- |Like 'toPyObject', but checks for Python exceptions when the object is
+-- 'nullPtr'.
 toPyObjectChecked :: RawPyObject -> IO PyObject
 toPyObjectChecked obj = do
   when (obj == nullPtr) throwCurrentPythonException
   toPyObject obj
 
+-- |Throw an exception representing the current Python exception.
 throwCurrentPythonException :: IO ()
 throwCurrentPythonException = do
   errorOccurred <- pyErr_Occurred
   unless (errorOccurred == nullPtr) (pyErr_PrintEx 0)
   throwIO PythonException
 
+-- |@'initialize' signalHandlers@ initializes the interpreter.
+--
+-- When @signalHandlers@ is true, install Python's signal handlers.
 initialize :: Bool -> IO ()
 initialize True = pyInitializeEx 1
 initialize False = pyInitializeEx 0
 
+-- |@'importModule' name@ imports the Python module with the given 'name'.
+--
+-- Throw a 'PythonException' if the import failed.
 importModule :: String -> IO PyObject
 importModule modName =
   withCAString modName pyImport_ImportModule >>= toPyObjectChecked
 
+-- |@'getAttr' object attribute@ gets the value of @attribute@ from @object@.
+--
+-- Throw a 'PythonException' if the attribute access failed.
 getAttr :: PyObject -> String -> IO PyObject
 getAttr obj attr = withForeignPtr obj $ \raw ->
   withCAString attr (pyObject_GetAttrString raw) >>= toPyObjectChecked
 
+-- |@'callObject' object args kwargs@ calls a callable @object@ with the given
+-- @args@ and @kwargs@.
+--
+-- Throw a 'PythonException' if the call failed.
 callObject :: PyObject -> [PyObject] -> [(PyObject, PyObject)] -> IO PyObject
 callObject obj args kwargs = do
   argsObj <- asTuple args
