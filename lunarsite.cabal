@@ -24,6 +24,7 @@ executable lunarsite
                        Web.Lunarsite.Main
                        Web.Lunarsite.Pandoc
                        Web.Lunarsite.Python
+                       Web.Lunarsite.Python.Native
                        Web.Lunarsite.Pygments
                        Web.Lunarsite.Routes
                        Web.Lunarsite.Template.Context

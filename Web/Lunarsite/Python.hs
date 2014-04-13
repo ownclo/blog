@@ -19,87 +19,36 @@
 -- THE SOFTWARE.
 
 {-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Web.Lunarsite.Python where
+module Web.Lunarsite.Python
+       (
+         -- * Initialization
+         initialize
+         -- * Errors
+       , PythonException(..)
+         -- * Modules
+       , importModule
+         -- * Object access
+       , getAttr
+       , callObject
+         -- * Value conversion
+       , Object(..)
+       )
+       where
 
-#include <Python.h>
+import Web.Lunarsite.Python.Native
 
 import qualified Data.ByteString.UTF8 as UTF8
-
 import Control.Exception (Exception,throwIO)
 import Control.Monad (when,unless,liftM)
 import Data.ByteString (useAsCStringLen,packCStringLen)
-import Data.Int (Int32,Int64)
 import Data.Typeable (Typeable)
-import Foreign.C (CString,withCAString)
-import Foreign.Ptr (Ptr,FunPtr,nullPtr)
-import Foreign.ForeignPtr (ForeignPtr,newForeignPtr,withForeignPtr)
+import Foreign.C (withCAString)
+import Foreign.Ptr (nullPtr)
+import Foreign.ForeignPtr (newForeignPtr,withForeignPtr)
 import Foreign.Marshal.Alloc (alloca)
 import Foreign.Storable (peek)
-
-type RawPyObject = Ptr ()
-type PyObject = ForeignPtr ()
-type PyInt = #type int
-type PySSizeT = #type Py_ssize_t
-
-foreign import ccall unsafe "Python.h &Py_DecRef"
-  pyDecRef :: FunPtr (RawPyObject -> IO ())
-
-foreign import ccall unsafe "Python.h Py_IncRef"
-  pyIncRef :: RawPyObject -> IO ()
-
-foreign import ccall unsafe "Python.h PyImport_ImportModule"
-  pyImport_ImportModule :: CString -> IO RawPyObject
-
-foreign import ccall unsafe "Python.h Py_InitializeEx"
-  pyInitializeEx :: PyInt -> IO ()
-
-foreign import ccall unsafe "Python.h PyString_FromStringAndSize"
-  pyString_FromStringAndSize :: CString -> PySSizeT -> IO RawPyObject
-
-foreign import ccall unsafe "Python.h PyString_AsStringAndSize"
-  pyString_AsStringAndSize :: RawPyObject -> Ptr CString -> Ptr PySSizeT -> IO PyInt
-
-#ifdef PYTHON_UCS2
-foreign import ccall unsafe "Python.h PyUnicodeUCS2_AsUTF8String"
-  pyUnicode_AsUTF8String :: RawPyObject -> IO RawPyObject
-
-foreign import ccall unsafe "Python.h PyUnicodeUCS2_FromStringAndSize"
-  pyUnicode_FromStringAndSize :: CString -> PySSizeT -> IO RawPyObject
-#else
-foreign import ccall unsafe "Python.h PyUnicodeUCS4_AsUTF8String"
-  pyUnicode_AsUTF8String :: RawPyObject -> IO RawPyObject
-
-foreign import ccall unsafe "Python.h PyUnicodeUCS4_FromStringAndSize"
-  pyUnicode_FromStringAndSize :: CString -> PySSizeT -> IO RawPyObject
-#endif
-
-foreign import ccall unsafe "Python.h PyTuple_New"
-  pyTuple_New :: PySSizeT -> IO RawPyObject
-
-foreign import ccall unsafe "Python.h PyTuple_SetItem"
-  pyTuple_SetItem :: RawPyObject -> PySSizeT -> RawPyObject -> IO PyInt
-
-foreign import ccall unsafe "Python.h PyDict_New"
-  pyDict_New :: IO RawPyObject
-
-foreign import ccall unsafe "Python.h PyDict_SetItem"
-  pyDict_SetItem :: RawPyObject -> RawPyObject -> RawPyObject -> IO PyInt
-
-foreign import ccall unsafe "Python.h PyObject_Call"
-  pyObject_Call :: RawPyObject -> RawPyObject -> RawPyObject -> IO RawPyObject
-
-foreign import ccall unsafe "Python.h PyObject_GetAttrString"
-  pyObject_GetAttrString :: RawPyObject -> CString -> IO RawPyObject
-
-foreign import ccall unsafe "Python.h PyErr_PrintEx"
-  pyErr_PrintEx :: PyInt -> IO ()
-
-foreign import ccall unsafe "Python.h PyErr_Occurred"
-  pyErr_Occurred :: IO RawPyObject
 
 data PythonException = PythonException deriving (Typeable,Show)
 
