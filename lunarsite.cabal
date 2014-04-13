@@ -19,6 +19,7 @@ extra-source-files:  css/*.css
                      index.html
 
 executable lunarsite
+  hs-source-dirs:      src/
   main-is:             main.hs
   other-modules:       Web.Lunarsite.Info
                        Web.Lunarsite.Main
