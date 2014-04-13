@@ -63,9 +63,15 @@ foreign import ccall unsafe "Python.h PyString_AsStringAndSize"
 #ifdef PYTHON_UCS2
 foreign import ccall unsafe "Python.h PyUnicodeUCS2_AsUTF8String"
   pyUnicode_AsUTF8String :: RawPyObject -> IO RawPyObject
+
+foreign import ccall unsafe "Python.h PyUnicodeUCS2_FromStringAndSize"
+  pyUnicode_FromStringAndSize :: CString -> PySSizeT -> IO RawPyObject
 #else
 foreign import ccall unsafe "Python.h PyUnicodeUCS4_AsUTF8String"
   pyUnicode_AsUTF8String :: RawPyObject -> IO RawPyObject
+
+foreign import ccall unsafe "Python.h PyUnicodeUCS4_FromStringAndSize"
+  pyUnicode_FromStringAndSize :: CString -> PySSizeT -> IO RawPyObject
 #endif
 
 foreign import ccall unsafe "Python.h PyTuple_New"
@@ -150,20 +156,17 @@ class Object a where
   toPy :: a -> IO PyObject
   fromPy :: PyObject -> IO a
 
-instance Object UTF8.ByteString where
-  toPy s = useAsCStringLen s $ \(buffer, len) ->
-     pyString_FromStringAndSize buffer (fromIntegral len) >>= toPyObjectChecked
-  fromPy o = alloca $ \s_buffer_ptr ->
-    alloca $ \s_len_ptr ->
-    withForeignPtr o $ \raw -> do
-      result <- pyString_AsStringAndSize raw s_buffer_ptr s_len_ptr
-      unless (result == 0) throwCurrentPythonException
-      buffer <- peek s_buffer_ptr
-      len <- peek s_len_ptr
-      packCStringLen (buffer, fromIntegral len)
-
 instance Object [Char] where
-  toPy s = toPy (UTF8.fromString s)
+  toPy s = useAsCStringLen (UTF8.fromString s) $ \(buffer, len) ->
+    pyUnicode_FromStringAndSize buffer (fromIntegral len) >>= toPyObjectChecked
   fromPy o = do
     s <- withForeignPtr o pyUnicode_AsUTF8String >>= toPyObjectChecked
-    liftM UTF8.toString (fromPy s)
+    liftM UTF8.toString (toByteString s)
+    where toByteString stringObj = alloca $ \s_buffer_ptr ->
+            alloca $ \s_len_ptr ->
+            withForeignPtr stringObj $ \raw -> do
+              result <- pyString_AsStringAndSize raw s_buffer_ptr s_len_ptr
+              unless (result == 0) throwCurrentPythonException
+              buffer <- peek s_buffer_ptr
+              len <- peek s_len_ptr
+              packCStringLen (buffer, fromIntegral len)
