@@ -18,6 +18,7 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -28,9 +29,11 @@ module Web.Lunarsite.Python where
 
 import qualified Data.ByteString.UTF8 as UTF8
 
+import Control.Exception (Exception,throwIO)
 import Control.Monad (when,unless,liftM)
 import Data.ByteString (useAsCStringLen,packCStringLen)
 import Data.Int (Int32,Int64)
+import Data.Typeable (Typeable)
 import Foreign.C (CString,withCAString)
 import Foreign.Ptr (Ptr,FunPtr,nullPtr)
 import Foreign.ForeignPtr (ForeignPtr,newForeignPtr,withForeignPtr)
@@ -92,6 +95,16 @@ foreign import ccall unsafe "Python.h PyObject_Call"
 foreign import ccall unsafe "Python.h PyObject_GetAttrString"
   pyObject_GetAttrString :: RawPyObject -> CString -> IO RawPyObject
 
+foreign import ccall unsafe "Python.h PyErr_PrintEx"
+  pyErr_PrintEx :: PyInt -> IO ()
+
+foreign import ccall unsafe "Python.h PyErr_Occurred"
+  pyErr_Occurred :: IO RawPyObject
+
+data PythonException = PythonException deriving (Typeable,Show)
+
+instance Exception PythonException
+
 toPyObject :: RawPyObject -> IO PyObject
 toPyObject = newForeignPtr pyDecRef
 
@@ -101,7 +114,10 @@ toPyObjectChecked obj = do
   toPyObject obj
 
 throwCurrentPythonException :: IO ()
-throwCurrentPythonException = undefined
+throwCurrentPythonException = do
+  errorOccurred <- pyErr_Occurred
+  unless (errorOccurred == nullPtr) (pyErr_PrintEx 0)
+  throwIO PythonException
 
 initialize :: Bool -> IO ()
 initialize True = pyInitializeEx 1
