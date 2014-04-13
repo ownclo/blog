@@ -18,31 +18,37 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 
-{-# LANGUAGE DeriveDataTypeable #-}
-
-module Web.Lunarsite.Pygments
+module Text.Highlighting.Pygments
        (toHtml)
        where
 
-import Control.Exception (throwIO,Exception)
-import Data.Typeable (Typeable)
-import System.Exit (ExitCode(..))
-import System.Process (readProcessWithExitCode)
-import Text.Printf (printf)
+import Foreign.Python
 
-data PygmentsError = PygmentsError Int String
-                   deriving Typeable
+type Lexer = PyObject
+type Formatter = PyObject
 
-instance Show PygmentsError where
-  show (PygmentsError code stderr) =
-    printf "Pygmentize failed with code %d: %s" code stderr
+getLexerByName :: String -> IO Lexer
+getLexerByName name = do
+  initialize False
+  lexers <- importModule "pygments.lexers"
+  get_lexer_by_name <- getAttr lexers "get_lexer_by_name"
+  pyName <- toPy name
+  callObject get_lexer_by_name [pyName] []
 
-instance Exception PygmentsError
+highlight :: String -> Lexer -> Formatter -> IO String
+highlight code lexer formatter = do
+  initialize False
+  pygments <- importModule "pygments"
+  py_highlight <- getAttr pygments "highlight"
+  codeObj <- toPy code
+  callObject py_highlight [codeObj, lexer, formatter] [] >>= fromPy
 
 toHtml :: String -> String -> IO String
-toHtml language code = do
-  (exitStatus, stdout, stderr) <- readProcessWithExitCode "pygmentize" args code
-  case exitStatus of
-    ExitFailure exitCode -> throwIO (PygmentsError exitCode stderr)
-    ExitSuccess -> return stdout
-  where args = ["-f", "html", "-Oencoding=utf-8", "-P", "nowrap", "-l", language]
+toHtml code language = do
+  lexer <- getLexerByName language
+  formatters <- importModule "pygments.formatters"
+  html_formatter <- getAttr formatters "HtmlFormatter"
+  cssclass_key <- toPy "cssclass"
+  cssclass <- toPy "highlight"
+  formatter <- callObject html_formatter [] [(cssclass_key, cssclass)]
+  highlight code lexer formatter
