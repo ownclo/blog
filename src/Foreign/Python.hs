@@ -25,6 +25,8 @@ module Foreign.Python
        (
          -- * Initialization
          initialize
+         -- * Types
+       , PyObject
          -- * Errors
        , PythonException(..)
          -- * Modules

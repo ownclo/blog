@@ -22,22 +22,33 @@ module Text.Highlighting.Pygments
        (toHtml)
        where
 
-import qualified Foreign.Python as Python
+import Foreign.Python
+
+type Lexer = PyObject
+type Formatter = PyObject
+
+getLexerByName :: String -> IO Lexer
+getLexerByName name = do
+  initialize False
+  lexers <- importModule "pygments.lexers"
+  get_lexer_by_name <- getAttr lexers "get_lexer_by_name"
+  pyName <- toPy name
+  callObject get_lexer_by_name [pyName] []
+
+highlight :: String -> Lexer -> Formatter -> IO String
+highlight code lexer formatter = do
+  initialize False
+  pygments <- importModule "pygments"
+  py_highlight <- getAttr pygments "highlight"
+  codeObj <- toPy code
+  callObject py_highlight [codeObj, lexer, formatter] [] >>= fromPy
 
 toHtml :: String -> String -> IO String
 toHtml code language = do
-  Python.initialize False
-  pygments <- Python.importModule "pygments"
-  formatters <- Python.importModule "pygments.formatters"
-  lexers <- Python.importModule "pygments.lexers"
-  html_formatter <- Python.getAttr formatters "HtmlFormatter"
-  cssclass_key <- Python.toPy "cssclass"
-  cssclass <- Python.toPy "highlight"
-  formatter <- Python.callObject html_formatter [] [(cssclass_key, cssclass)]
-  get_lexer_by_name <- Python.getAttr lexers "get_lexer_by_name"
-  languageObj <- Python.toPy language
-  lexer <- Python.callObject get_lexer_by_name [languageObj] []
-  highlight <- Python.getAttr pygments "highlight"
-  codeObj <- Python.toPy code
-  highlighted_code <- Python.callObject highlight [codeObj, lexer, formatter] []
-  Python.fromPy highlighted_code
+  lexer <- getLexerByName language
+  formatters <- importModule "pygments.formatters"
+  html_formatter <- getAttr formatters "HtmlFormatter"
+  cssclass_key <- toPy "cssclass"
+  cssclass <- toPy "highlight"
+  formatter <- callObject html_formatter [] [(cssclass_key, cssclass)]
+  highlight code lexer formatter
