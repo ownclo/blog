@@ -33,6 +33,8 @@ import Hakyll.Core.Item (Item)
 import Hakyll.Web.Pandoc (pandocCompilerWithTransformM
                          ,defaultHakyllReaderOptions
                          ,defaultHakyllWriterOptions)
+import Text.Pandoc.Options (ReaderOptions,
+                            WriterOptions(writerHtml5,writerHighlight))
 import Text.Pandoc (Pandoc,Inline(Link),Block(CodeBlock,RawBlock),nullAttr)
 import Text.Pandoc.Walk (walkM)
 import Text.Printf (printf)
@@ -41,6 +43,7 @@ import Text.Printf (printf)
 referenceEmacsLispSymbol :: String -> String -> String
 referenceEmacsLispSymbol =
   printf "http://bruce-connor.github.io/emacs-online-documentation/%s%%2F%s"
+
 
 transformSpecialSchemes :: URI -> Compiler (Maybe String)
 transformSpecialSchemes URI{uriScheme=scheme,uriPath=path} =
@@ -53,6 +56,7 @@ transformSpecialSchemes URI{uriScheme=scheme,uriPath=path} =
     "el-face:" -> return (Just (referenceEmacsLispSymbol "Face" path))
     _ -> return Nothing
 
+
 transformLinks :: Inline -> Compiler Inline
 transformLinks link@(Link ref (url,title)) =
   case parseAbsoluteURI url of
@@ -64,6 +68,7 @@ transformLinks link@(Link ref (url,title)) =
         Just newUrl -> return (Link ref (newUrl,title))
 transformLinks x = return x
 
+
 pygmentizeCodeBlocks :: Block -> Compiler Block
 pygmentizeCodeBlocks x@(CodeBlock attr _) | attr == nullAttr = return x
 pygmentizeCodeBlocks x@(CodeBlock (_,[],_) _) = return x
@@ -72,10 +77,21 @@ pygmentizeCodeBlocks (CodeBlock (_,language:_,_) text) = do
   return (RawBlock "html" colored)
 pygmentizeCodeBlocks x = return x
 
+
 transformDocument :: Pandoc -> Compiler Pandoc
 transformDocument doc = walkM transformLinks doc >>= walkM pygmentizeCodeBlocks
 
+
+readerOptions :: ReaderOptions
+readerOptions = defaultHakyllReaderOptions
+
+
+writerOptions :: WriterOptions
+writerOptions =
+  -- We need HTML 5 output, since we are using bootstrap
+  defaultHakyllWriterOptions { writerHtml5 = True
+                             }
+
 transformingPandocCompiler :: Compiler (Item String)
 transformingPandocCompiler =
-  pandocCompilerWithTransformM defaultHakyllReaderOptions
-  defaultHakyllWriterOptions transformDocument
+  pandocCompilerWithTransformM readerOptions writerOptions transformDocument
