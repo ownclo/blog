@@ -44,7 +44,7 @@ import Foreign.Python.Native
 import qualified Data.ByteString.UTF8 as UTF8
 import Control.Exception (Exception,throwIO)
 import Control.Monad (when,unless,liftM)
-import Data.ByteString (useAsCStringLen,packCStringLen)
+import Data.ByteString (ByteString,useAsCStringLen,packCStringLen)
 import Data.Typeable (Typeable)
 import Foreign.C (withCAString)
 import Foreign.Ptr (nullPtr)
@@ -149,17 +149,22 @@ class Object a where
   toPy :: a -> IO PyObject
   fromPy :: PyObject -> IO a
 
+instance Object ByteString where
+  toPy s = useAsCStringLen s $ \(buffer, len) ->
+    pyString_FromStringAndSize buffer (fromIntegral len) >>= toPyObjectChecked
+  fromPy s =
+    alloca $ \s_buffer_ptr ->
+    alloca $ \s_len_ptr ->
+    withPyObject s $ \raw -> do
+      result <- pyString_AsStringAndSize raw s_buffer_ptr s_len_ptr
+      unless (result == 0) throwCurrentPythonException
+      buffer <- peek s_buffer_ptr
+      len <- peek s_len_ptr
+      packCStringLen (buffer, fromIntegral len)
+
 instance Object [Char] where
   toPy s = useAsCStringLen (UTF8.fromString s) $ \(buffer, len) ->
     pyUnicode_FromStringAndSize buffer (fromIntegral len) >>= toPyObjectChecked
   fromPy o = do
     s <- withPyObject o pyUnicode_AsUTF8String >>= toPyObjectChecked
-    liftM UTF8.toString (toByteString s)
-    where toByteString stringObj = alloca $ \s_buffer_ptr ->
-            alloca $ \s_len_ptr ->
-            withPyObject stringObj $ \raw -> do
-              result <- pyString_AsStringAndSize raw s_buffer_ptr s_len_ptr
-              unless (result == 0) throwCurrentPythonException
-              buffer <- peek s_buffer_ptr
-              len <- peek s_len_ptr
-              packCStringLen (buffer, fromIntegral len)
+    liftM UTF8.toString (fromPy s)
