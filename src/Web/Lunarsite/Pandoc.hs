@@ -88,8 +88,10 @@ readerOptions = defaultHakyllReaderOptions
 
 writerOptions :: WriterOptions
 writerOptions =
-  -- We need HTML 5 output, since we are using bootstrap
+  -- We need HTML 5 output, since we are using bootstrap, and we disable the
+  -- built-in highlighting of Pandoc, since we ship our own based on Pygments.
   defaultHakyllWriterOptions { writerHtml5 = True
+                             , writerHighlight = False
                              }
 
 transformingPandocCompiler :: Compiler (Item String)
