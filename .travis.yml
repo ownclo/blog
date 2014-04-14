@@ -9,7 +9,7 @@ install:
   # Required for syntax highlighting
   - sudo pip install pygments
 script:
-  - cabal configure --flags '-ucs2'
+  - cabal configure
   - cabal build
   - cabal run lunarsite build
   - cabal run lunarsite check

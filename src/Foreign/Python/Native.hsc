@@ -19,6 +19,7 @@
 -- THE SOFTWARE.
 
 {-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE CApiFFI #-}
 
 module Foreign.Python.Native where
 
@@ -50,19 +51,11 @@ foreign import ccall unsafe "Python.h PyString_FromStringAndSize"
 foreign import ccall unsafe "Python.h PyString_AsStringAndSize"
   pyString_AsStringAndSize :: RawPyObject -> Ptr CString -> Ptr PySSizeT -> IO PyInt
 
-#ifdef PYTHON_UCS2
-foreign import ccall unsafe "Python.h PyUnicodeUCS2_AsUTF8String"
+foreign import capi unsafe "Python.h PyUnicode_AsUTF8String"
   pyUnicode_AsUTF8String :: RawPyObject -> IO RawPyObject
 
-foreign import ccall unsafe "Python.h PyUnicodeUCS2_FromStringAndSize"
+foreign import capi unsafe "Python.h PyUnicode_FromStringAndSize"
   pyUnicode_FromStringAndSize :: CString -> PySSizeT -> IO RawPyObject
-#else
-foreign import ccall unsafe "Python.h PyUnicodeUCS4_AsUTF8String"
-  pyUnicode_AsUTF8String :: RawPyObject -> IO RawPyObject
-
-foreign import ccall unsafe "Python.h PyUnicodeUCS4_FromStringAndSize"
-  pyUnicode_FromStringAndSize :: CString -> PySSizeT -> IO RawPyObject
-#endif
 
 foreign import ccall unsafe "Python.h PyTuple_New"
   pyTuple_New :: PySSizeT -> IO RawPyObject
