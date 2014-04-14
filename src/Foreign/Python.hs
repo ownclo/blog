@@ -48,10 +48,12 @@ import Data.ByteString (useAsCStringLen,packCStringLen)
 import Data.Typeable (Typeable)
 import Foreign.C (withCAString)
 import Foreign.Ptr (nullPtr)
-import Foreign.ForeignPtr (newForeignPtr,withForeignPtr)
+import Foreign.ForeignPtr (ForeignPtr,newForeignPtr,withForeignPtr)
 import Foreign.Marshal.Alloc (alloca)
 import Foreign.Storable (peek)
 
+
+newtype PyObject = PyObject (ForeignPtr ())
 data PythonException = PythonException deriving (Typeable,Show)
 
 instance Exception PythonException
@@ -61,7 +63,11 @@ instance Exception PythonException
 -- A managed point will automatically de-reference the object pointed to when it
 -- goes out of scope.
 toPyObject :: RawPyObject -> IO PyObject
-toPyObject = newForeignPtr pyDecRef
+toPyObject raw = liftM PyObject (newForeignPtr pyDecRef raw)
+
+-- |@'withPyObject' object action@ runs @action@ with the unwrapped @object@.
+withPyObject :: PyObject -> (RawPyObject -> IO a) -> IO a
+withPyObject (PyObject ptr) = withForeignPtr ptr
 
 -- |Like 'toPyObject', but checks for Python exceptions when the object is
 -- 'nullPtr'.
@@ -95,7 +101,7 @@ importModule modName =
 --
 -- Throw a 'PythonException' if the attribute access failed.
 getAttr :: PyObject -> String -> IO PyObject
-getAttr obj attr = withForeignPtr obj $ \raw ->
+getAttr obj attr = withPyObject obj $ \raw ->
   withCAString attr (pyObject_GetAttrString raw) >>= toPyObjectChecked
 
 -- |@'callObject' object args kwargs@ calls a callable @object@ with the given
@@ -106,20 +112,20 @@ callObject :: PyObject -> [PyObject] -> [(PyObject, PyObject)] -> IO PyObject
 callObject obj args kwargs = do
   argsObj <- asTuple args
   kwargsObj <- asDict kwargs
-  withForeignPtr argsObj $ \rawArgsObj ->
-    withForeignPtr kwargsObj $ \rawKwargsObj ->
-    withForeignPtr obj $ \raw ->
+  withPyObject argsObj $ \rawArgsObj ->
+    withPyObject kwargsObj $ \rawKwargsObj ->
+    withPyObject obj $ \raw ->
     pyObject_Call raw rawArgsObj rawKwargsObj >>= toPyObjectChecked
 
 asTuple :: [PyObject] -> IO PyObject
 asTuple objects = do
   tuple <- pyTuple_New (fromIntegral (length objects)) >>= toPyObjectChecked
-  withForeignPtr tuple (setItems objects 0)
+  withPyObject tuple (setItems objects 0)
   return tuple
   where
     setItems :: [PyObject] -> PySSizeT -> RawPyObject -> IO ()
     setItems [] _ _ = return ()
-    setItems (x:xs) index tuple = withForeignPtr x $ \item -> do
+    setItems (x:xs) index tuple = withPyObject x $ \item -> do
       pyIncRef item             -- setItem steals the reference!
       result <- pyTuple_SetItem tuple index item
       unless (result == 0) throwCurrentPythonException
@@ -128,13 +134,13 @@ asTuple objects = do
 asDict :: [(PyObject, PyObject)] -> IO PyObject
 asDict items = do
   dict <- pyDict_New >>= toPyObjectChecked
-  withForeignPtr dict (addItems items)
+  withPyObject dict (addItems items)
   return dict
   where
     addItems [] _ = return ()
     addItems ((key, value):rest) dict =
-      withForeignPtr key $ \rawKey ->
-      withForeignPtr value $ \rawValue -> do
+      withPyObject key $ \rawKey ->
+      withPyObject value $ \rawValue -> do
       result <- pyDict_SetItem dict rawKey rawValue
       unless (result == 0) throwCurrentPythonException
       addItems rest dict
@@ -147,11 +153,11 @@ instance Object [Char] where
   toPy s = useAsCStringLen (UTF8.fromString s) $ \(buffer, len) ->
     pyUnicode_FromStringAndSize buffer (fromIntegral len) >>= toPyObjectChecked
   fromPy o = do
-    s <- withForeignPtr o pyUnicode_AsUTF8String >>= toPyObjectChecked
+    s <- withPyObject o pyUnicode_AsUTF8String >>= toPyObjectChecked
     liftM UTF8.toString (toByteString s)
     where toByteString stringObj = alloca $ \s_buffer_ptr ->
             alloca $ \s_len_ptr ->
-            withForeignPtr stringObj $ \raw -> do
+            withPyObject stringObj $ \raw -> do
               result <- pyString_AsStringAndSize raw s_buffer_ptr s_len_ptr
               unless (result == 0) throwCurrentPythonException
               buffer <- peek s_buffer_ptr

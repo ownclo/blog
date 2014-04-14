@@ -27,10 +27,8 @@ module Foreign.Python.Native where
 import Data.Int (Int32,Int64)
 import Foreign.C (CString)
 import Foreign.Ptr (Ptr,FunPtr)
-import Foreign.ForeignPtr (ForeignPtr)
 
 type RawPyObject = Ptr ()
-type PyObject = ForeignPtr ()
 type PyInt = #type int
 type PySSizeT = #type Py_ssize_t
 
