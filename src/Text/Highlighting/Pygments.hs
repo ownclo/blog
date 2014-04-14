@@ -19,13 +19,31 @@
 -- THE SOFTWARE.
 
 module Text.Highlighting.Pygments
-       (toHtml)
+       (isAvailable,toHtml)
        where
 
 import Foreign.Python
 
+import qualified Data.ByteString.UTF8 as UTF8
+import Control.Exception (try)
+import Control.Monad (liftM)
+
 type Lexer = PyObject
 type Formatter = PyObject
+
+-- |@'isAvailable'@ checkers whether Pygments is available or not.
+--
+-- If Pygments is not available, return @'Nothing'@.  Otherwise return @'Just'
+-- version@, where @version@ is the version number of Pygments.
+isAvailable :: IO (Maybe String)
+isAvailable = do
+  initialize False
+  result <- try (importModule "pygments")
+  case result of
+    (Left PythonException) -> return Nothing
+    (Right pygments) -> do
+      version <- getAttr pygments "__version__"
+      liftM (Just . UTF8.toString) (fromPy version)
 
 getLexerByName :: String -> IO Lexer
 getLexerByName name = do

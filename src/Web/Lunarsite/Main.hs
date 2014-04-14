@@ -23,13 +23,16 @@
 module Web.Lunarsite.Main (main) where
 
 import qualified Web.Lunarsite.Info as I
+import qualified Text.Highlighting.Pygments as P
 import Web.Lunarsite.Pandoc
 import Web.Lunarsite.Routes
 import Web.Lunarsite.Template.Context
 
 import Data.Monoid ((<>))
 import Hakyll hiding (defaultContext)
+import System.Exit (exitFailure)
 import System.FilePath (takeFileName)
+import System.IO (stderr,hPutStrLn)
 import Text.Printf (printf)
 
 feedConfiguration :: FeedConfiguration
@@ -49,8 +52,18 @@ hakyllConfiguration = defaultConfiguration {
   where includeSomeHiddenFiles _ fn | takeFileName fn ==  ".nojekyll" = False
         includeSomeHiddenFiles ignore fn = ignore fn
 
+checkPygments :: IO ()
+checkPygments = do
+  result <- P.isAvailable
+  case result of
+    Just pygmentsVersion -> putStrLn ("Using Pygments " ++ pygmentsVersion)
+    Nothing -> do
+      hPutStrLn stderr "Pygments not available!"
+      exitFailure
+
 main :: IO ()
 main = hakyllWith hakyllConfiguration $ do
+  preprocess checkPygments
   tags <- buildTags "posts/*" (fromCapture "tags/*.html")
   tagFeeds <- buildTags "posts/*" (fromCapture "tags/*.atom")
 
