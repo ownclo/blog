@@ -13,9 +13,9 @@ check_environment() {
 
 
 check_environment "$TRAVIS_REPO_SLUG" "lunaryorn/blog" "not our repo"
-check_environment "$TRAVIS_BRANCH" "master" "not the master branch"
 check_environment "$TRAVIS_PULL_REQUEST" "false" "pull request"
 check_environment "$TRAVIS_SECURE_ENV_VARS" "true" "secure variables missing"
+check_environment "$TRAVIS_BRANCH" "master" "not the master branch"
 
 echo "Publishing blog... \n"
 
