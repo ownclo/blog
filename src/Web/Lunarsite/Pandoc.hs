@@ -18,13 +18,11 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Web.Lunarsite.Pandoc
        (transformingPandocCompiler)
        where
 
-import qualified Text.Highlighting.Pygments as P
+import Text.Highlighting.Pygments.Pandoc
 
 import Network.URI (parseAbsoluteURI,URI(URI,uriScheme,uriPath))
 import Hakyll.Core.Compiler (Compiler,getRoute,unsafeCompiler)
@@ -35,7 +33,7 @@ import Hakyll.Web.Pandoc (pandocCompilerWithTransformM
                          ,defaultHakyllWriterOptions)
 import Text.Pandoc.Options (ReaderOptions,
                             WriterOptions(writerHtml5,writerHighlight))
-import Text.Pandoc (Pandoc,Inline(Link),Block(CodeBlock,RawBlock),nullAttr)
+import Text.Pandoc (Pandoc,Inline(Link))
 import Text.Pandoc.Walk (walkM)
 import Text.Printf (printf)
 
@@ -69,17 +67,9 @@ transformLinks link@(Link ref (url,title)) =
 transformLinks x = return x
 
 
-pygmentizeCodeBlocks :: Block -> Compiler Block
-pygmentizeCodeBlocks x@(CodeBlock attr _) | attr == nullAttr = return x
-pygmentizeCodeBlocks x@(CodeBlock (_,[],_) _) = return x
-pygmentizeCodeBlocks (CodeBlock (_,language:_,_) text) = do
-  colored <- unsafeCompiler (P.toHtml text language)
-  return (RawBlock "html" colored)
-pygmentizeCodeBlocks x = return x
-
-
 transformDocument :: Pandoc -> Compiler Pandoc
-transformDocument doc = walkM transformLinks doc >>= walkM pygmentizeCodeBlocks
+transformDocument doc =
+  walkM transformLinks doc >>= unsafeCompiler.codeBlocksToHtml
 
 
 readerOptions :: ReaderOptions

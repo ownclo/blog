@@ -29,6 +29,7 @@ executable lunarsite
   other-modules:       Foreign.Python
                        Foreign.Python.Native
                        Text.Highlighting.Pygments
+                       Text.Highlighting.Pygments.Pandoc
                        Web.Lunarsite.Info
                        Web.Lunarsite.Main
                        Web.Lunarsite.Pandoc
