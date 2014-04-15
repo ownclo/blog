@@ -68,9 +68,9 @@ tagsContext = tagsFieldWith getTags renderLink (mconcat.concatLinks) "tags"
     renderLink tag (Just filePath) =
       Just $ H.a ! A.href (toValue $ toUrl filePath) $ toHtml tag
 
-archivePageContext :: String -> String -> [Item String] -> Context String
-archivePageContext title feed posts =
+archivePageContext :: String -> String -> [Item String] -> Tags -> Context String
+archivePageContext title feed posts tags =
   C.constField "title" title <>
   C.constField "feed" feed <>
-  C.listField "posts" postContext (return posts) <>
+  C.listField "posts" (tagsContext tags <> postContext) (return posts) <>
   defaultContext

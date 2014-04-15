@@ -71,9 +71,10 @@ main = hakyllWith hakyllConfiguration $ do
     route idRoute
     compile $ do
       posts <- recentFirst =<< loadAll pattern
-      let context = archivePageContext (printf "Posts tagged “%s”" tag)
-                                   (printf "/tags/%s.atom" tag)
-                                   posts
+      let context = archivePageContext
+                    (printf "Posts tagged “%s”" tag)
+                    (printf "/tags/%s.atom" tag)
+                    posts tags
       makeItem ""
         >>= loadAndApplyTemplate "templates/post-list.html" context
         >>= loadAndApplyTemplate "templates/archive-page.html" context
@@ -117,14 +118,14 @@ main = hakyllWith hakyllConfiguration $ do
     route postRoute
     compile $ transformingPandocCompiler
       >>= saveSnapshot "postContent"
-      >>= loadAndApplyTemplate "templates/post.html"    (tagsContext tags <> postContext)
+      >>= loadAndApplyTemplate "templates/post.html" (tagsContext tags <> postContext)
       >>= loadAndApplyTemplate "templates/default.html" postContext
 
   create ["archive.html"] $ do
     route idRoute
     compile $ do
       posts <- recentFirst =<< loadAll "posts/*"
-      let context = archivePageContext "Archives" "/feed.atom" posts
+      let context = archivePageContext "Archives" "/feed.atom" posts tags
       makeItem ""
         >>= loadAndApplyTemplate "templates/post-list.html" context
         >>= loadAndApplyTemplate "templates/archive-page.html" context
@@ -134,12 +135,10 @@ main = hakyllWith hakyllConfiguration $ do
     route idRoute
     compile $ do
       posts <- recentFirst =<< loadAll "posts/*"
-      let indexCtx = listField "posts" postContext (return (take 10 posts)) <>
-                     constField "title" "Home" <>
-                     defaultContext
+      let context = archivePageContext "Home" "/feed.atom" (take 10 posts) tags
       getResourceBody
-        >>= applyAsTemplate indexCtx
-        >>= loadAndApplyTemplate "templates/default.html" indexCtx
+        >>= applyAsTemplate context
+        >>= loadAndApplyTemplate "templates/default.html" context
 
   match "404.md" $ do
     route $ setExtension "html"
