@@ -15,7 +15,7 @@ highlighter used by Github and others.
 
 Fortunately, it's easy to implement custom highlighting thanks to the great API
 of Pandoc.  It's just two functions in
-[**`Text.Highlighting.Pygments.Pandoc`**][thpp]:
+[**Text.Highlighting.Pygments.Pandoc**][thpp]:
 
 ```haskell
 import Text.Highlighting.Pygments (toHtml)
@@ -52,7 +52,7 @@ through Haskell's FFI.  This is what came out of this attempt.
 Native wrappers
 ===============
 
-[**`Foreign.Python.Native`**][fpn] is an [hsc2hs][] module which imports the
+[**Foreign.Python.Native**][fpn] is an [hsc2hs][] module which imports the
 required functions from Python's C API and declares corresponding Haskell
 signatures.
 
@@ -87,8 +87,8 @@ out whether to link `pyUnicodeUCS2_AsUTF8String` or
 Convenient Haskell API
 ======================
 
-[**`Foreign.Python`**][fp] is the convenient Haskell API around the native
-Python functions.
+[**Foreign.Python**][fp] is the convenient Haskell API around the
+[native Python functions](#native-wrappers).
 
 I use `ForeignPtr` to wrap the raw `PyObject` pointers into an opaque Haskell
 type which automatically calls `Py_XDECREF` on the underlying `PyObject` when it
@@ -193,8 +193,8 @@ instance Object String where
 Pygments interface
 ==================
 
-[**`Text.Highlighting.Pygments`**][thp] is the Pygments interface that builds
-upon [`Foreign.Python`](#convenient-haskell-api).
+[**Text.Highlighting.Pygments**][thp] is the Pygments interface that builds upon
+this [Python API](#convenient-haskell-api).
 
 I start with some type aliases for Pygments types.  They don't add additional
 type safety, because Python is dynamically typed anyway, but they make the type
@@ -301,8 +301,8 @@ executable lunarsite
 ```
 
 I enable `hsc2hs` in `build-tools` to compile
-[`Foreign.Python.Native`](#native-wrappers), and tell Cabal to link against
-Python 2.7.
+[Foreign.Python.Native](#native-wrappers), and tell Cabal to link against Python
+2.7.
 
 `pkg-config` is missing on OS X, but since the layout of the pre-installed
 system Python is fixed anyway, I just hard-code the library name and the include
