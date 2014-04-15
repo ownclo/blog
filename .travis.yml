@@ -17,7 +17,3 @@ script:
   - cabal run lunarsite check
 after_success:
 - bash travis-deploy.bash
-cache:
-  directories:
-    - $HOME/.ghc
-    - $HOME/.cabal
