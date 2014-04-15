@@ -1,6 +1,13 @@
 <dl class="dl-horizontal">
   $for(posts)$
-  <dt>$date$<dt>
-  <dd><a href="$url$">$title$</a> <small>(in $tags$)</small></dd>
+  <dt>
+    <small>$date$</small>
+  </dt>
+  <dd>
+    <p>
+      <strong><a href="$url$">$title$</a></strong><br>
+      <small>posted in $tags$</small>
+    </p>
+  </dd>
   $endfor$
 </dl>
