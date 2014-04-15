@@ -20,6 +20,7 @@
 
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 module Foreign.Python
        (
@@ -162,7 +163,7 @@ instance Object ByteString where
       len <- peek s_len_ptr
       packCStringLen (buffer, fromIntegral len)
 
-instance Object [Char] where
+instance Object String where
   toPy s = useAsCStringLen (UTF8.fromString s) $ \(buffer, len) ->
     pyUnicode_FromStringAndSize buffer (fromIntegral len) >>= toPyObjectChecked
   fromPy o = do
