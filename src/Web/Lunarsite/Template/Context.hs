@@ -39,7 +39,8 @@ import Hakyll.Web.Template.Context (Context)
 import Text.Blaze.Html (toValue,toHtml,(!))
 
 infoContext :: Context String
-infoContext = C.constField "siteCopyright" I.siteCopyright <>
+infoContext = C.constField "siteDescription" I.siteDescription <>
+              C.constField "siteCopyright" I.siteCopyright <>
               C.constField "siteAuthor" I.siteAuthor <>
               C.constField "siteAuthorEmail" I.siteAuthorEmail <>
               C.constField "siteCopyright" I.siteCopyright <>

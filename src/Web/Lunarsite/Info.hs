@@ -30,7 +30,7 @@ module Web.Lunarsite.Info
        where
 
 siteDescription :: String
-siteDescription = "Emacs. What else?"
+siteDescription = "Emacs.  What else?  A bit of Haskell probably…"
 
 siteAuthor :: String
 siteAuthor = "Sebastian Wiesner"
