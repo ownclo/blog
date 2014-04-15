@@ -157,7 +157,7 @@ Fortunately `Foreign.Marshal.Alloc.alloca` comes to rescue and conveniently
 allocates addressable fields which I can then hand down to Python.  Python puts
 the address and size of the underlying string buffer into these fields, which I
 can then read with `Foreign.Storable.peek` to copy the entire byte sequence into
-a independent `ByteString`:
+an independent `ByteString`:
 
 ```haskell
   fromPy s =
@@ -325,7 +325,7 @@ It would even been even easier, however, if the C API of Python 2.7 was a little
 better, and had a little more consistent reference count semantics, and if
 Haskell supported varargs functions in its FFI.
 
-While Python functions normally do not steal references and to not return
+While Python functions normally do not steal references and do not return
 borrowed references, there are some notable exceptions, which lead the entire
 attempt to provide a consistent API ad absurdum, since you still need to check
 any function carefully for how it handles the reference counts in its arguments
