@@ -4,7 +4,10 @@ env:
   global:
     - secure: "HlDP2le4lW8BDsVNt4M+PZ54kJrdI1KLrjk2qW2dtAoq0U3vo+iiR4K8W0c/xxqYhTlSCUc8CbkfGgsoEBRuHqBMgEGdUxsEvDiFHoCHPqe8qgC7sW6cNzVCjRvjo4e/MLRsIIppuUWjrz5wyCVOHCh4hgg8Jw3/Ba3Wutwb/9s="
 install:
+  # Install expensive dependencies with reduced features
   - cabal install --flag '-watchserver -previewserver' hakyll
+  - cabal install --flag '-http-conduit' pandoc
+  # Install the remaining deps
   - cabal install --dependencies-only
   # Required for syntax highlighting
   - sudo pip install pygments
