@@ -92,7 +92,7 @@ main = hakyllWith hakyllConfiguration $ do
   create ["tags/index.html"] $ do
     route idRoute
     compile $ do
-      cloud <- renderTagCloud 100 130 tags
+      cloud <- renderTagCloud 100 200 tags
       let context = constField "title" "Tags" <> defaultContext
       makeItem cloud
         >>= loadAndApplyTemplate "templates/page.html" context
