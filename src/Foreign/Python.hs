@@ -66,16 +66,16 @@ instance Exception PythonException
 toPyObject :: RawPyObject -> IO PyObject
 toPyObject raw = liftM PyObject (newForeignPtr pyDecRef raw)
 
--- |@'withPyObject' object action@ runs @action@ with the unwrapped @object@.
-withPyObject :: PyObject -> (RawPyObject -> IO a) -> IO a
-withPyObject (PyObject ptr) = withForeignPtr ptr
-
 -- |Like 'toPyObject', but checks for Python exceptions when the object is
 -- 'nullPtr'.
 toPyObjectChecked :: RawPyObject -> IO PyObject
 toPyObjectChecked obj = do
   when (obj == nullPtr) throwCurrentPythonException
   toPyObject obj
+
+-- |@'withPyObject' object action@ runs @action@ with the unwrapped @object@.
+withPyObject :: PyObject -> (RawPyObject -> IO a) -> IO a
+withPyObject (PyObject ptr) = withForeignPtr ptr
 
 -- |Throw an exception representing the current Python exception.
 throwCurrentPythonException :: IO ()
