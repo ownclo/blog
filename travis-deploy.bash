@@ -17,7 +17,7 @@ check_environment "$TRAVIS_PULL_REQUEST" "false" "pull request"
 check_environment "$TRAVIS_SECURE_ENV_VARS" "true" "secure variables missing"
 check_environment "$TRAVIS_BRANCH" "master" "not the master branch"
 
-echo "Publishing blog... \n"
+echo "Publishing blog..."
 
 # Git setup
 export GIT_COMMITTER_EMAIL='lunaryorn@gmail.com'
