@@ -141,6 +141,11 @@ main = hakyllWith hakyllConfiguration $ do
         >>= applyAsTemplate indexCtx
         >>= loadAndApplyTemplate "templates/default.html" indexCtx
 
+  match "404.md" $ do
+    route $ setExtension "html"
+    compile $ transformingPandocCompiler
+      >>= loadAndApplyTemplate "templates/default.html" defaultContext
+
   -- For compatibility with the old Tinkerer-based site
   create ["rss.html"] $ do
     route idRoute
