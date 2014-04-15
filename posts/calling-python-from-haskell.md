@@ -81,7 +81,7 @@ GHC automatically generates a wrapper C functions for these macros, and figures
 out whether to link `pyUnicodeUCS2_AsUTF8String` or
 `pyUnicodeUCS4_AsUTF8String`.
 
-[fpn]: https://github.com/lunaryorn/blog/blob/f9c1c518bb140d25a49ca2592d8664a43c67ff6f/src/Foreign/Python/Native.hsc
+[fpn]: https://github.com/lunaryorn/blog/blob/e0d3faa6d95cb567d7356dec902575691051b5a5/src/Foreign/Python/Native.hsc
 [hsc2hs]: http://www.haskell.org/ghc/docs/7.6.3/html/users_guide/hsc2hs.html
 
 Convenient Haskell API
@@ -188,7 +188,7 @@ instance Object String where
     liftM UTF8.toString (fromPy s)
 ```
 
-[fp]: https://github.com/lunaryorn/blog/blob/306c891845311a8a4e424cabfade4db07318c603/src/Foreign/Python.hs
+[fp]: https://github.com/lunaryorn/blog/blob/e0d3faa6d95cb567d7356dec902575691051b5a5/src/Foreign/Python.hs
 
 Pygments interface
 ==================
