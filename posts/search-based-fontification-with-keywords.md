@@ -18,6 +18,10 @@ faces provided by Emacs.
 
 This article illustrates the basic principles of Search-based fontification.
 
+[font-lock]: internal:posts/font-locking-in-emacs.md
+[flk]: el-variable:font-lock-keywords
+[syn-font-lock]: internal:posts/syntactic-fontification-in-emacs.md
+
 Prerequisites
 =============
 
@@ -68,6 +72,9 @@ some quite essential prerequisites first:
     (eval-after-load 're-builder '(setq reb-re-syntax 'rx))
     ```
 
+[rx]: el-function:rx
+[reb]: el-function:re-builder
+
 Setup boilerplate
 =================
 
@@ -109,6 +116,8 @@ These are the most important settings.  There are some optional elements for
 additional settings, such as a special syntax table for fontification, but these
 are rarely needed, so we'll not discuss them here.  Take a look at the docstring
 of [`font-lock-defaults`][fld] for more information.
+
+[fld]: el-variable:font-lock-defaults
 
 Defining keywords
 =================
@@ -326,6 +335,8 @@ your mode is a good Emacs citizen in this regard:
   care for whether a theme supports your specific mode or not.
 
 [standard font lock faces]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html#Faces-for-Font-Lock
+[flkf]: el-variable:font-lock-keyword-face
+[fltf]: el-variable:font-lock-type-face
 
 ### Custom faces
 
@@ -379,6 +390,10 @@ The standard faces however predate this convention, and keep their names for
 backwards compatibility.  With regards to faces, you should *not* follow Font
 Lock as a template.
 
+[flsf]: el-variable:font-lock-string-face
+[flcsf]: el-variable:font-lock-constant-face
+[defface]: el-function:defface
+[defcustom]: el-function:defcustom
 [Defining Faces]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Defining-Faces.html
 
 ### Face variables versus faces
@@ -483,19 +498,7 @@ So long
       find-variable RET font-lock-comment-face</kbd>, or in your browser in
       Emacs' Git web interface, at [font-lock.el, line 292][l292].
 
-[font-lock]: internal:posts/font-locking-in-emacs.md
-[syn-font-lock]: internal:posts/syntactic-fontification-in-emacs.md
-[reb]: el-function:re-builder
-[flk]: el-variable:font-lock-keywords
-[fld]: el-variable:font-lock-defaults
-[rx]: el-function:rx
-[flkf]: el-variable:font-lock-keyword-face
+[#39]: https://github.com/lunaryorn/puppet-mode/pull/39
 [flbf]: el-variable:font-lock-builtin-face
 [flcf]: el-variable:font-lock-comment-face
-[flcsf]: el-variable:font-lock-constant-face
-[fltf]: el-variable:font-lock-type-face
-[flsf]: el-variable:font-lock-string-face
-[defface]: el-function:defface
-[defcustom]: el-function:defcustom
 [l292]: http://git.savannah.gnu.org/cgit/emacs.git/tree/lisp/font-lock.el?h=trunk&id=b8392964d2735a0ac3230ddfbbfab8a82d02415d#n292
-[#39]: https://github.com/lunaryorn/puppet-mode/pull/39

@@ -9,6 +9,8 @@ explains the concept of “syntactic fontification” of strings and comments.  
 font locking technique is the easiest to get started with, although the concept
 itself is quite intricate and powerful.
 
+[font-lock]: internal:posts/font-locking-in-emacs.md
+
 Syntax tables
 =============
 
@@ -48,6 +50,11 @@ reference.
 
 </div>
 
+[Syntax Table]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Tables.html
+[Syntax Descriptors]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Descriptors.html
+[fs]: el-function:forward-symbol
+[fw]: el-function:forward-word
+
 Strings
 =======
 
@@ -75,9 +82,9 @@ three arguments:
 simple.  A descriptor is a string, where each character has a special meaning.
 In our example, the descriptors are simple two-character strings.
 
-The first character in this string defines the **syntax class** (see [Syntax
-Class Table][]).  The quotation mark `"` denotes the “String quotes” class,
-i.e. characters which delimit strings.
+The first character in this string defines the **syntax class** (see
+[Syntax Class Table][]).  The quotation mark `"` denotes the “String quotes”
+class, i.e. characters which delimit strings.
 
 The second character denotes the *matching character*.  Unsurprisingly, for our
 strings the matching character is the same as the character we classify.  By
@@ -90,6 +97,12 @@ This little table is (almost) everything that's needed for proper fontification
 of strings!  We don't even need to explicitly enable this table in our major
 mode, because [`define-derived-mode`][ddm] (the standard way to declare major
 modes) already does that for us!
+
+[mst]: el-function:make-syntax-table
+[mse]: el-function:modify-syntax-entry
+[Syntax Class Table]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Class-Table.html
+[Syntax Flags]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Flags.html 
+[ddm]: el-function:define-derived-mode
 
 Escape characters
 =================
@@ -234,6 +247,11 @@ Emacs, identifies triple-quoted strings explicitly, and adds special text
 properties to mark their contents as strings.  This is quite a complicated
 approach, which I'll probably also cover in a later article in this series.
 
+[fld]: el-variable:font-lock-defaults
+[Search-based fontification]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Search_002dbased-Fontification.html
+[fsexp]: el-function:forward-sexp
+[Smartparens]: https://github.com/Fuco1/smartparens
+
 Conclusion
 ==========
 
@@ -246,18 +264,3 @@ In the next article of this series, we'll look at fontifying specific syntactic
 elements of the Puppet language with [Search-based fontification][].
 
 Stay tuned!
-
-[font-lock]: internal:posts/font-locking-in-emacs.md
-[fs]: el-function:forward-symbol
-[fw]: el-function:forward-word
-[fsexp]: el-function:forward-sexp
-[fld]: el-variable:font-lock-defaults
-[mst]: el-function:make-syntax-table
-[mse]: el-function:modify-syntax-entry
-[ddm]: el-function:define-derived-mode
-[Syntax Table]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Tables.html
-[Syntax Descriptors]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Descriptors.html
-[Syntax Class Table]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Class-Table.html
-[Syntax Flags]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Flags.html 
-[Search-based fontification]: http://www.gnu.org/software/emacs/manual/html_node/elisp/Search_002dbased-Fontification.html
-[Smartparens]: https://github.com/Fuco1/smartparens
