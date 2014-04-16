@@ -50,4 +50,4 @@ executable lunarsite
      extra-libraries:   python2.7
      include-dirs:      /usr/include/python2.7
   else
-     pkgconfig-depends: python ==2.7
+     pkgconfig-depends: python-2.7
