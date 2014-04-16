@@ -30,6 +30,8 @@ module Foreign.Python
        , PyObject
          -- * Errors
        , PythonException(..)
+       , isFatalError
+       , isPythonException
          -- * Modules
        , importModule
          -- * Object access
@@ -47,18 +49,39 @@ import qualified Data.ByteString.UTF8 as UTF8
 import Control.Exception (Exception,throwIO)
 import Control.Monad (unless,liftM,(>=>))
 import Data.ByteString (ByteString,useAsCStringLen,packCStringLen)
+import Data.Traversable (sequence)
 import Data.Typeable (Typeable)
 import Foreign.C (withCAString)
 import Foreign.Ptr (nullPtr)
 import Foreign.ForeignPtr (ForeignPtr,newForeignPtr,withForeignPtr)
 import Foreign.Marshal.Alloc (alloca)
 import Foreign.Storable (peek)
+import Prelude hiding (sequence)
 
 
 newtype PyObject = PyObject (ForeignPtr ())
-data PythonException = PythonException deriving (Typeable,Show)
+data PythonException = FatalPythonError
+                     | PythonException String (Maybe String)
+                     deriving (Typeable,Show)
 
 instance Exception PythonException
+
+-- |@'isFatalError' exception@ determines whether the given @exception@ denotes
+-- a fatal error in the Python layer.
+--
+-- If a fatal error occurs, the Python layer hit an unexpected state, which
+-- likely indicates a programmer error.
+isFatalError :: PythonException -> Bool
+isFatalError FatalPythonError = True
+isFatalError _                = False
+
+-- |@'isPythonException' exception@ determines whether the given @exception@ is
+-- an exception thrown from Python code.
+--
+-- Unlike 'isFatalError' these exceptions can occur in the regular use of Python
+-- libraries.
+isPythonException :: PythonException -> Bool
+isPythonException = not.isFatalError
 
 -- |@'toPyObject' object@ converts the raw @object@ into a managed pointer.
 --
@@ -100,9 +123,17 @@ currentPythonException =
 -- |Throw an exception representing the current Python exception.
 throwCurrentPythonException :: IO a
 throwCurrentPythonException = do
-  errorOccurred <- pyErr_Occurred
-  unless (errorOccurred == nullPtr) (pyErr_PrintEx 0)
-  throwIO PythonException
+  exception <- currentPythonException
+  case exception of
+    (Nothing, _, _) -> throwIO FatalPythonError
+    (Just excType, excValue, _) -> do
+      excTypeName <- qualifiedTypeName excType
+      excFormattedValue <- sequence (fmap toUnicode excValue)
+      throwIO (PythonException excTypeName excFormattedValue)
+  where qualifiedTypeName typeObj = do
+          moduleName <- getAttr typeObj "__module__"  >>= fromPy
+          className <- getAttr typeObj "__name__" >>= fromPy
+          return (UTF8.toString moduleName ++ "." ++ UTF8.toString className)
 
 -- |@'initialize' signalHandlers@ initializes the interpreter.
 --
