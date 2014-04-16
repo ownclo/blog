@@ -57,12 +57,19 @@ import Foreign.ForeignPtr (ForeignPtr,newForeignPtr,withForeignPtr)
 import Foreign.Marshal.Alloc (alloca)
 import Foreign.Storable (peek)
 import Prelude hiding (sequence)
+import Text.Printf (printf)
 
 
 newtype PyObject = PyObject (ForeignPtr ())
 data PythonException = FatalPythonError
                      | PythonException String (Maybe String)
-                     deriving (Typeable,Show)
+                     deriving (Typeable)
+
+instance Show PythonException where
+  show FatalPythonError = "Fatal Python Error"
+  show (PythonException typeName Nothing) = "Python exception: " ++ typeName
+  show (PythonException typeName (Just excMessage)) =
+    printf "Python exception: %s: %s" typeName excMessage
 
 instance Exception PythonException
 
