@@ -86,9 +86,3 @@ foreign import ccall unsafe "Python.h PyErr_NormalizeException"
                            -> Ptr RawPyObject
                            -> Ptr RawPyObject
                            -> IO ()
-
-foreign import ccall unsafe "Python.h PyErr_PrintEx"
-  pyErr_PrintEx :: PyInt -> IO ()
-
-foreign import ccall unsafe "Python.h PyErr_Occurred"
-  pyErr_Occurred :: IO RawPyObject
