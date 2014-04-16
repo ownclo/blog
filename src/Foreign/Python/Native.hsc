@@ -75,6 +75,9 @@ foreign import ccall unsafe "Python.h PyObject_Call"
 foreign import ccall unsafe "Python.h PyObject_GetAttrString"
   pyObject_GetAttrString :: RawPyObject -> CString -> IO RawPyObject
 
+foreign import ccall unsafe "Python.h PyObject_Unicode"
+  pyObject_Unicode :: RawPyObject -> IO RawPyObject
+
 foreign import ccall unsafe "Python.h PyErr_Fetch"
   pyErr_Fetch :: Ptr RawPyObject -> Ptr RawPyObject -> Ptr RawPyObject -> IO ()
 

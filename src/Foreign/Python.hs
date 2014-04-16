@@ -33,6 +33,7 @@ module Foreign.Python
          -- * Modules
        , importModule
          -- * Object access
+       , toUnicode
        , getAttr
        , callObject
          -- * Value conversion
@@ -116,6 +117,12 @@ initialize False = pyInitializeEx 0
 importModule :: String -> IO PyObject
 importModule modName =
   withCAString modName pyImport_ImportModule >>= toPyObjectChecked
+
+-- |@'toUnicode' object@ converts any @object@ into a unicode string, like
+-- Python's @unicode()@ function does.
+toUnicode :: PyObject -> IO String
+toUnicode obj =
+  withPyObject obj pyObject_Unicode >>= toPyObjectChecked >>= fromPy
 
 -- |@'getAttr' object attribute@ gets the value of @attribute@ from @object@.
 --
