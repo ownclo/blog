@@ -75,6 +75,15 @@ foreign import ccall unsafe "Python.h PyObject_Call"
 foreign import ccall unsafe "Python.h PyObject_GetAttrString"
   pyObject_GetAttrString :: RawPyObject -> CString -> IO RawPyObject
 
+foreign import ccall unsafe "Python.h PyErr_Fetch"
+  pyErr_Fetch :: Ptr RawPyObject -> Ptr RawPyObject -> Ptr RawPyObject -> IO ()
+
+foreign import ccall unsafe "Python.h PyErr_NormalizeException"
+  pyErr_NormalizeException :: Ptr RawPyObject
+                           -> Ptr RawPyObject
+                           -> Ptr RawPyObject
+                           -> IO ()
+
 foreign import ccall unsafe "Python.h PyErr_PrintEx"
   pyErr_PrintEx :: PyInt -> IO ()
 

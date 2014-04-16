@@ -79,6 +79,23 @@ toPyObjectChecked = toPyObject >=> maybe throwCurrentPythonException return
 withPyObject :: PyObject -> (RawPyObject -> IO a) -> IO a
 withPyObject (PyObject ptr) = withForeignPtr ptr
 
+-- |@'currentPythonException'@ gets the current Python exception as a triple of
+-- @(excType, excValue, excTraceback)@.  If @excType@ is @Nothing@, there is no
+-- current exception.  @excValue@ and @excTraceback@ may be @Nothing@ even when
+-- @excType@ is not, in cause of exceptions without a value or traceback
+-- respectively.
+currentPythonException :: IO (Maybe PyObject, Maybe PyObject, Maybe PyObject)
+currentPythonException =
+  alloca $ \excTypePtr ->
+  alloca $ \excValuePtr ->
+  alloca $ \excTracebackPtr -> do
+    pyErr_Fetch excTypePtr excValuePtr excTracebackPtr
+    pyErr_NormalizeException excTypePtr excValuePtr excTracebackPtr
+    excType <- peek excTypePtr >>= toPyObject
+    excValue <- peek excValuePtr >>= toPyObject
+    excTraceback <- peek excTracebackPtr >>= toPyObject
+    return (excType, excValue, excTraceback)
+
 -- |Throw an exception representing the current Python exception.
 throwCurrentPythonException :: IO a
 throwCurrentPythonException = do
