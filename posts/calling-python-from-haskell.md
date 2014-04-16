@@ -93,6 +93,26 @@ Convenient Haskell API
 [**Foreign.Python**][fp] is the convenient Haskell API around the
 [native Python functions](#native-wrappers).
 
+<div class="alert alert-info">
+
+**Update!** <small> Apr 16, 2014</small>
+
+I changed `toPyObject` to return `Nothing` if given a null pointer, for
+increased safety.  Previously `toPyObject` would simply wrap the given pointer,
+whether `NULL` or not.
+
+While wrapping a `NULL` pointer in a managed pointer doesn't do any harm in and
+by itself, because the dereferencing functions from Python are safe to call with
+`NULL`, it was still possible to try and use the pointer, e.g. by trying to call
+the underlying Python object, and thus trigger a segfault.
+
+Now it's impossible to obtain a `PyObject` from `NULL`, increasing the safety of
+my Python API.
+
+The definition of `toPyObjectChecked` was updated accordingly.
+
+</div>
+
 I use `ForeignPtr` to wrap the raw `PyObject` pointers into an opaque Haskell
 type which automatically calls `Py_XDECREF` on the underlying `PyObject` when it
 goes out of scope:
@@ -100,8 +120,9 @@ goes out of scope:
 ```haskell
 newtype PyObject = PyObject (ForeignPtr ())
 
-toPyObject :: RawPyObject -> IO PyObject
-toPyObject raw = liftM PyObject (newForeignPtr pyDecRef raw)
+toPyObject :: RawPyObject -> IO (Maybe PyObject)
+toPyObject raw | raw == nullPtr  = return Nothing
+toPyObject raw = liftM (Just . PyObject) (newForeignPtr pyDecRef raw)
 
 withPyObject :: PyObject -> (RawPyObject -> IO a) -> IO a
 withPyObject (PyObject ptr) = withForeignPtr ptr
@@ -118,9 +139,7 @@ given a `NULL` pointer:
 
 ```haskell
 toPyObjectChecked :: RawPyObject -> IO PyObject
-toPyObjectChecked obj = do
-  when (obj == nullPtr) throwCurrentPythonException
-  toPyObject obj
+toPyObjectChecked obj = toPyObject >=> maybe throwCurrentPythonException return
 ```
 
 To obtain objects from the Python runtime, I define a bunch of functions to
