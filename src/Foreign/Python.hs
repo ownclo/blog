@@ -44,7 +44,7 @@ import Foreign.Python.Native
 
 import qualified Data.ByteString.UTF8 as UTF8
 import Control.Exception (Exception,throwIO)
-import Control.Monad (when,unless,liftM)
+import Control.Monad (unless,liftM,(>=>))
 import Data.ByteString (ByteString,useAsCStringLen,packCStringLen)
 import Data.Typeable (Typeable)
 import Foreign.C (withCAString)
@@ -61,24 +61,26 @@ instance Exception PythonException
 
 -- |@'toPyObject' object@ converts the raw @object@ into a managed pointer.
 --
--- A managed point will automatically de-reference the object pointed to when it
--- goes out of scope.
-toPyObject :: RawPyObject -> IO PyObject
-toPyObject raw = liftM PyObject (newForeignPtr pyDecRef raw)
+-- Returns the managed pointer, or @'Nothing'@ if @object@ was a null pointer.
+--
+-- A managed pointer will automatically de-reference the object pointed to when
+-- it goes out of scope.
+toPyObject :: RawPyObject -> IO (Maybe PyObject)
+toPyObject raw | raw == nullPtr  = return Nothing
+toPyObject raw =
+  liftM (Just . PyObject) (newForeignPtr pyDecRef raw)
 
--- |Like 'toPyObject', but checks for Python exceptions when the object is
--- 'nullPtr'.
+-- |Like 'toPyObject', but throws the current Python exception if given a null
+-- pointer.
 toPyObjectChecked :: RawPyObject -> IO PyObject
-toPyObjectChecked obj = do
-  when (obj == nullPtr) throwCurrentPythonException
-  toPyObject obj
+toPyObjectChecked = toPyObject >=> maybe throwCurrentPythonException return
 
 -- |@'withPyObject' object action@ runs @action@ with the unwrapped @object@.
 withPyObject :: PyObject -> (RawPyObject -> IO a) -> IO a
 withPyObject (PyObject ptr) = withForeignPtr ptr
 
 -- |Throw an exception representing the current Python exception.
-throwCurrentPythonException :: IO ()
+throwCurrentPythonException :: IO a
 throwCurrentPythonException = do
   errorOccurred <- pyErr_Occurred
   unless (errorOccurred == nullPtr) (pyErr_PrintEx 0)
