@@ -49,6 +49,7 @@ import qualified Data.ByteString.UTF8 as UTF8
 import Control.Exception (Exception,throwIO)
 import Control.Monad (unless,liftM,(>=>))
 import Data.ByteString (ByteString,useAsCStringLen,packCStringLen)
+import Data.ByteString.Unsafe (unsafeUseAsCStringLen)
 import Data.Traversable (sequence)
 import Data.Typeable (Typeable)
 import Foreign.C (withCAString)
@@ -215,7 +216,7 @@ class Object a where
   fromPy :: PyObject -> IO a
 
 instance Object ByteString where
-  toPy s = useAsCStringLen s $ \(buffer, len) ->
+  toPy s = unsafeUseAsCStringLen s $ \(buffer, len) ->
     pyString_FromStringAndSize buffer (fromIntegral len) >>= toPyObjectChecked
   fromPy s =
     alloca $ \s_buffer_ptr ->
@@ -228,7 +229,7 @@ instance Object ByteString where
       packCStringLen (buffer, fromIntegral len)
 
 instance Object String where
-  toPy s = useAsCStringLen (UTF8.fromString s) $ \(buffer, len) ->
+  toPy s = unsafeUseAsCStringLen (UTF8.fromString s) $ \(buffer, len) ->
     pyUnicode_FromStringAndSize buffer (fromIntegral len) >>= toPyObjectChecked
   fromPy o = do
     s <- withPyObject o pyUnicode_AsUTF8String >>= toPyObjectChecked
