@@ -26,11 +26,10 @@ module Foreign.Python.Native where
 #include <Python.h>
 
 import Data.Int (Int32,Int64)
-import Foreign.C (CString)
+import Foreign.C (CInt(..),CString)
 import Foreign.Ptr (Ptr,FunPtr)
 
 type RawPyObject = Ptr ()
-type PyInt = #type int
 type PySSizeT = #type Py_ssize_t
 
 foreign import ccall unsafe "Python.h &Py_DecRef"
@@ -43,13 +42,13 @@ foreign import ccall unsafe "Python.h PyImport_ImportModule"
   pyImport_ImportModule :: CString -> IO RawPyObject
 
 foreign import ccall unsafe "Python.h Py_InitializeEx"
-  pyInitializeEx :: PyInt -> IO ()
+  pyInitializeEx :: CInt -> IO ()
 
 foreign import ccall unsafe "Python.h PyString_FromStringAndSize"
   pyString_FromStringAndSize :: CString -> PySSizeT -> IO RawPyObject
 
 foreign import ccall unsafe "Python.h PyString_AsStringAndSize"
-  pyString_AsStringAndSize :: RawPyObject -> Ptr CString -> Ptr PySSizeT -> IO PyInt
+  pyString_AsStringAndSize :: RawPyObject -> Ptr CString -> Ptr PySSizeT -> IO CInt
 
 foreign import capi unsafe "Python.h PyUnicode_AsUTF8String"
   pyUnicode_AsUTF8String :: RawPyObject -> IO RawPyObject
@@ -61,13 +60,13 @@ foreign import ccall unsafe "Python.h PyTuple_New"
   pyTuple_New :: PySSizeT -> IO RawPyObject
 
 foreign import ccall unsafe "Python.h PyTuple_SetItem"
-  pyTuple_SetItem :: RawPyObject -> PySSizeT -> RawPyObject -> IO PyInt
+  pyTuple_SetItem :: RawPyObject -> PySSizeT -> RawPyObject -> IO CInt
 
 foreign import ccall unsafe "Python.h PyDict_New"
   pyDict_New :: IO RawPyObject
 
 foreign import ccall unsafe "Python.h PyDict_SetItem"
-  pyDict_SetItem :: RawPyObject -> RawPyObject -> RawPyObject -> IO PyInt
+  pyDict_SetItem :: RawPyObject -> RawPyObject -> RawPyObject -> IO CInt
 
 foreign import ccall unsafe "Python.h PyObject_Call"
   pyObject_Call :: RawPyObject -> RawPyObject -> RawPyObject -> IO RawPyObject
