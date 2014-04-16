@@ -25,7 +25,7 @@ module Foreign.Python.Native where
 
 #include <Python.h>
 
-import Data.Int (Int32,Int64)
+import Data.Int
 import Foreign.C (CInt(..),CString)
 import Foreign.Ptr (Ptr,FunPtr)
 
