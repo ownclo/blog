@@ -26,7 +26,7 @@ Looks familiar?  Then you're probably a fellow Emacs developer trying to upload
 a package to the [Marmalade][] ELPA archive.
 
 We've been getting this fancy error for some time now, and there's already a
-nice [issue][] for it, but no little progress.  Just like, er, well… in the
+nice [issue][] for it, but little progress.  Just like, er, well… in the
 entire Marmalade itself.  Sure, there is Nic Ferrier's brand-new Emacs Lisp
 Marmalade rewrite super-thing, but… ok, even Duke Nukem made it to a release
 eventually, so we have some hope left, haven't we?
@@ -50,10 +50,10 @@ $ marmalade-upload lunaryorn dist/flycheck-0.18.tar
 ```
 
 The tool will ask for your Marmalade password, and upload the package.  For
-extra safety, it checks the mimetype of the given file first, and throws an
-error if it's invalid.  If you're on OS X or KDE, the tool will put your
-Marmalade login token (not your Marmalade password!) into the keychain, so you
-won't be prompted for your password next time.
+extra safety, it checks the mimetype of the file first, and throws an error if
+it's invalid.  If you're on OS X or KDE, the tool will put your Marmalade login
+token (not your Marmalade password!) into the keychain, so you won't be prompted
+for your password next time.
 
 And, yes, sorry for the inconvenient language, but it's a boring tool for a
 stupid bug, so I at least try to learn a bit from it by refreshing what little

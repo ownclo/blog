@@ -32,13 +32,15 @@ codeBlocksToHtml :: Pandoc -> IO Pandoc
 codeBlocksToHtml = walkM blockToHtml
 ```
 
-This code transforms all code blocks which have a class denoting a language to a
-raw HTML block which contains the code highlighted by Pygments.
+This code transforms all code blocks to a raw HTML block containing the code
+highlighted by Pygments.  The language used in the code block is taken from the
+first unnamed attribute of the code block, just like in Github's markdown
+dialect.  Code blocks which do not specify a language are not touched.
 
 So far I just went the easy way, and just called the
 [`pygmentize` script][pygmentize] in `toHtml`, passing the code to be
-highlighted on stdin, and reading the result from stdout.  While this is easy
-to implement with just a few lines, it's also very, very slow.
+highlighted on stdin, and reading the result from stdout.  While this is easy to
+implement with just a few lines, it's also very, very slow.
 
 Last weekend I sat down and tried to call Pygments directly via Python's C API
 through Haskell's FFI.  This is what came out of this attempt.
@@ -56,10 +58,11 @@ Native wrappers
 required functions from Python's C API and declares corresponding Haskell
 signatures.
 
-The module also declares the necessary types, using of a special `hsc2hs`
-feature to automatically derive the right Haskell type for a given C type.  For
+The module also declares the necessary types, using a special `hsc2hs` feature
+to automatically derive the right Haskell type for a given C type.  For
 instance, the following declaration declares an appropriate Haskell alias for
-Python's `Py_ssize_t`, without having to grok an header files for the `typedef`:
+Python's `Py_ssize_t`, so I didn't need to grok the header files for the
+typedef:
 
 ```haskell
 type PySSizeT = #type Py_ssize_t
@@ -78,8 +81,8 @@ foreign import capi unsafe "Python.h PyUnicode_FromStringAndSize"
 ```
 
 GHC automatically generates a wrapper C functions for these macros, and figures
-out whether to link `pyUnicodeUCS2_AsUTF8String` or
-`pyUnicodeUCS4_AsUTF8String`.
+out whether to link `PyUnicodeUCS2_AsUTF8String` or
+`PyUnicodeUCS4_AsUTF8String`.
 
 [fpn]: https://github.com/lunaryorn/blog/blob/e0d3faa6d95cb567d7356dec902575691051b5a5/src/Foreign/Python/Native.hsc
 [hsc2hs]: http://www.haskell.org/ghc/docs/7.6.3/html/users_guide/hsc2hs.html
@@ -175,7 +178,7 @@ Converting from a `String` almost looks like converting from a `ByteString`,
 except that we need to encode the `String` to UTF-8 to pass it to
 `PyUnicode_FromStringAndSize`, which expects a UTF-8 encoded char array.
 Converting back is simple as well, because I can build upon the `ByteString`
-conversion from above. I just need to turn the Python unicode object into a
+conversion from above. I just need to turn the Python unicode object into an
 encoded char array with `PyUnicode_AsUTF8String` which I can then convert to a
 `ByteString` and decode:
 
@@ -227,10 +230,10 @@ The function
 4. converts the given `language` to a Python object,
 5. and ultimately calls `get_lexer_by_name` with the appropriate arguments.
 
-Note that all of this function is as safe as it can be when dealing with a
-dynamically typed language:
+Note that this function is as safe as it can be when dealing with a dynamically
+typed language:
 
-- It will never work on invalid objects, because Python operations never fail
+- It will never try to use invalid objects, because Python operations never fail
   silently.  If any Python call fails, e.g. because Pygments is not installed,
   the Python interface throws a Haskell exception.
 - Even in case of an exception, the function does not leak memory.  All
