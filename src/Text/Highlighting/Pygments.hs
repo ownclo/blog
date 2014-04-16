@@ -25,8 +25,8 @@ module Text.Highlighting.Pygments
 import Foreign.Python
 
 import qualified Data.ByteString.UTF8 as UTF8
-import Control.Exception (try)
-import Control.Monad (liftM)
+import Control.Exception (tryJust)
+import Control.Monad (liftM,guard)
 
 type Lexer = PyObject
 type Formatter = PyObject
@@ -38,10 +38,10 @@ type Formatter = PyObject
 isAvailable :: IO (Maybe String)
 isAvailable = do
   initialize False
-  result <- try (importModule "pygments")
+  result <- tryJust (guard.isPythonException) (importModule "pygments")
   case result of
-    (Left PythonException) -> return Nothing
-    (Right pygments) -> do
+    Left _ -> return Nothing
+    Right pygments -> do
       version <- getAttr pygments "__version__"
       liftM (Just . UTF8.toString) (fromPy version)
 

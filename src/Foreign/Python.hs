@@ -30,9 +30,12 @@ module Foreign.Python
        , PyObject
          -- * Errors
        , PythonException(..)
+       , isFatalError
+       , isPythonException
          -- * Modules
        , importModule
          -- * Object access
+       , toUnicode
        , getAttr
        , callObject
          -- * Value conversion
@@ -46,18 +49,39 @@ import qualified Data.ByteString.UTF8 as UTF8
 import Control.Exception (Exception,throwIO)
 import Control.Monad (unless,liftM,(>=>))
 import Data.ByteString (ByteString,useAsCStringLen,packCStringLen)
+import Data.Traversable (sequence)
 import Data.Typeable (Typeable)
 import Foreign.C (withCAString)
 import Foreign.Ptr (nullPtr)
 import Foreign.ForeignPtr (ForeignPtr,newForeignPtr,withForeignPtr)
 import Foreign.Marshal.Alloc (alloca)
 import Foreign.Storable (peek)
+import Prelude hiding (sequence)
 
 
 newtype PyObject = PyObject (ForeignPtr ())
-data PythonException = PythonException deriving (Typeable,Show)
+data PythonException = FatalPythonError
+                     | PythonException String (Maybe String)
+                     deriving (Typeable,Show)
 
 instance Exception PythonException
+
+-- |@'isFatalError' exception@ determines whether the given @exception@ denotes
+-- a fatal error in the Python layer.
+--
+-- If a fatal error occurs, the Python layer hit an unexpected state, which
+-- likely indicates a programmer error.
+isFatalError :: PythonException -> Bool
+isFatalError FatalPythonError = True
+isFatalError _                = False
+
+-- |@'isPythonException' exception@ determines whether the given @exception@ is
+-- an exception thrown from Python code.
+--
+-- Unlike 'isFatalError' these exceptions can occur in the regular use of Python
+-- libraries.
+isPythonException :: PythonException -> Bool
+isPythonException = not.isFatalError
 
 -- |@'toPyObject' object@ converts the raw @object@ into a managed pointer.
 --
@@ -79,12 +103,37 @@ toPyObjectChecked = toPyObject >=> maybe throwCurrentPythonException return
 withPyObject :: PyObject -> (RawPyObject -> IO a) -> IO a
 withPyObject (PyObject ptr) = withForeignPtr ptr
 
+-- |@'currentPythonException'@ gets the current Python exception as a triple of
+-- @(excType, excValue, excTraceback)@.  If @excType@ is @Nothing@, there is no
+-- current exception.  @excValue@ and @excTraceback@ may be @Nothing@ even when
+-- @excType@ is not, in cause of exceptions without a value or traceback
+-- respectively.
+currentPythonException :: IO (Maybe PyObject, Maybe PyObject, Maybe PyObject)
+currentPythonException =
+  alloca $ \excTypePtr ->
+  alloca $ \excValuePtr ->
+  alloca $ \excTracebackPtr -> do
+    pyErr_Fetch excTypePtr excValuePtr excTracebackPtr
+    pyErr_NormalizeException excTypePtr excValuePtr excTracebackPtr
+    excType <- peek excTypePtr >>= toPyObject
+    excValue <- peek excValuePtr >>= toPyObject
+    excTraceback <- peek excTracebackPtr >>= toPyObject
+    return (excType, excValue, excTraceback)
+
 -- |Throw an exception representing the current Python exception.
 throwCurrentPythonException :: IO a
 throwCurrentPythonException = do
-  errorOccurred <- pyErr_Occurred
-  unless (errorOccurred == nullPtr) (pyErr_PrintEx 0)
-  throwIO PythonException
+  exception <- currentPythonException
+  case exception of
+    (Nothing, _, _) -> throwIO FatalPythonError
+    (Just excType, excValue, _) -> do
+      excTypeName <- qualifiedTypeName excType
+      excFormattedValue <- sequence (fmap toUnicode excValue)
+      throwIO (PythonException excTypeName excFormattedValue)
+  where qualifiedTypeName typeObj = do
+          moduleName <- getAttr typeObj "__module__"  >>= fromPy
+          className <- getAttr typeObj "__name__" >>= fromPy
+          return (UTF8.toString moduleName ++ "." ++ UTF8.toString className)
 
 -- |@'initialize' signalHandlers@ initializes the interpreter.
 --
@@ -99,6 +148,12 @@ initialize False = pyInitializeEx 0
 importModule :: String -> IO PyObject
 importModule modName =
   withCAString modName pyImport_ImportModule >>= toPyObjectChecked
+
+-- |@'toUnicode' object@ converts any @object@ into a unicode string, like
+-- Python's @unicode()@ function does.
+toUnicode :: PyObject -> IO String
+toUnicode obj =
+  withPyObject obj pyObject_Unicode >>= toPyObjectChecked >>= fromPy
 
 -- |@'getAttr' object attribute@ gets the value of @attribute@ from @object@.
 --
