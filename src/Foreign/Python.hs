@@ -48,7 +48,7 @@ import Foreign.Python.Native
 import qualified Data.ByteString.UTF8 as UTF8
 import Control.Exception (Exception,throwIO)
 import Control.Monad (unless,liftM,(>=>))
-import Data.ByteString (ByteString,useAsCStringLen,packCStringLen)
+import Data.ByteString (ByteString,packCStringLen)
 import Data.ByteString.Unsafe (unsafeUseAsCStringLen)
 import Data.Traversable (sequence)
 import Data.Typeable (Typeable)
