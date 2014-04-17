@@ -8,13 +8,13 @@ Background
 ==========
 
 In this blog I'm using [Pandoc][] to convert Markdown to HTML.  It's by far the
-best and most powerful markdown converter, with just a little weakness: It's
-syntax highlighting based [highlighting-kate][] is less good and supports less
-languages than the Python library [Pygments][], which is the de-facto standard
-highlighter used by Github and others.
+best and most powerful markdown converter, but it has one, albeit little
+weakness: Its syntax highlighting is based [highlighting-kate][], which is less
+good and supports less languages than the Python library [Pygments][], the
+de-facto standard highlighter used by Github and others.
 
 Fortunately, it's easy to implement custom highlighting thanks to the great API
-of Pandoc.  It's just two functions in
+of Pandoc, with just two functions in
 [**Text.Highlighting.Pygments.Pandoc**][thpp]:
 
 ```haskell
