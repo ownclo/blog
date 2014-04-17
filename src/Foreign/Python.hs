@@ -47,7 +47,7 @@ import Foreign.Python.Native
 
 import qualified Data.ByteString.UTF8 as UTF8
 import Control.Exception (Exception,throwIO)
-import Control.Monad (unless,liftM,(>=>))
+import Control.Monad ((>=>),unless,liftM,forM_,foldM_)
 import Data.ByteString (ByteString,packCStringLen)
 import Data.ByteString.Unsafe (unsafeUseAsCStringLen)
 import Data.Traversable (sequence)
@@ -184,32 +184,29 @@ callObject obj args kwargs = do
     pyObject_Call raw rawArgsObj rawKwargsObj >>= toPyObjectChecked
 
 asTuple :: [PyObject] -> IO PyObject
-asTuple objects = do
-  tuple <- pyTuple_New (fromIntegral (length objects)) >>= toPyObjectChecked
-  withPyObject tuple (setItems objects 0)
+asTuple items = do
+  tuple <- pyTuple_New (fromIntegral (length items)) >>= toPyObjectChecked
+  withPyObject tuple $ \tuplePtr -> foldM_ (setItem tuplePtr) 0 items
   return tuple
   where
-    setItems :: [PyObject] -> PySSizeT -> RawPyObject -> IO ()
-    setItems [] _ _ = return ()
-    setItems (x:xs) index tuple = withPyObject x $ \item -> do
-      pyIncRef item             -- setItem steals the reference!
-      result <- pyTuple_SetItem tuple index item
-      unless (result == 0) throwCurrentPythonException
-      setItems xs (index + 1) tuple
+    setItem tuplePtr index item =
+      withPyObject item $ \itemPtr -> do
+        pyIncRef itemPtr             -- setItem steals the reference!
+        result <- pyTuple_SetItem tuplePtr index itemPtr
+        unless (result == 0) throwCurrentPythonException
+        return (index + 1)
 
 asDict :: [(PyObject, PyObject)] -> IO PyObject
 asDict items = do
   dict <- pyDict_New >>= toPyObjectChecked
-  withPyObject dict (addItems items)
+  withPyObject dict (forM_ items.addItem)
   return dict
   where
-    addItems [] _ = return ()
-    addItems ((key, value):rest) dict =
+    addItem dictPtr (key, value) =
       withPyObject key $ \rawKey ->
       withPyObject value $ \rawValue -> do
-      result <- pyDict_SetItem dict rawKey rawValue
+      result <- pyDict_SetItem dictPtr rawKey rawValue
       unless (result == 0) throwCurrentPythonException
-      addItems rest dict
 
 class Object a where
   toPy :: a -> IO PyObject
