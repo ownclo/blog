@@ -139,7 +139,7 @@ given a `NULL` pointer:
 
 ```haskell
 toPyObjectChecked :: RawPyObject -> IO PyObject
-toPyObjectChecked obj = toPyObject >=> maybe throwCurrentPythonException return
+toPyObjectChecked = toPyObject >=> maybe throwCurrentPythonException return
 ```
 
 To obtain objects from the Python runtime, I define a bunch of functions to
